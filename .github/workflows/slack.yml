@@ -1,0 +1,17 @@
+name: slack-notification
+
+on:
+  issues:
+    types: [opened]
+jobs:
+  slack-notifications:
+    runs-on: self-hosted
+    name: Sends a message to Slack when a push, a pull request or an issue is made
+    steps:
+      - name: Send message to Slack API
+        uses: archive/github-actions-slack@v2.0.0
+        id: notify
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: C063P2JDMMM
+          slack-text: ${{ github.server_url }}/${{ github.repository }}/issues/${{ github.event.issue.number }}  \n A new issue has been opened, "${{ github.event.issue.title }}" in ${{ github.repository }} \n and was opened by "${{ github.event.issue.user.login }}".

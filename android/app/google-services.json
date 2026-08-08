@@ -1,0 +1,119 @@
+{
+  "project_info": {
+    "project_number": "121184558555",
+    "project_id": "ufcecommerce-ac2e7",
+    "storage_bucket": "ufcecommerce-ac2e7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121184558555:android:bb158b3012a0f5c5b4dbfe",
+        "android_client_info": {
+          "package_name": "sa.com.ufc.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "121184558555-12sf8k47kc4s11l5fckt9bhjelsrnsri.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "734aca8164963b39867231b795ac2baf7f81873d"
+          }
+        },
+        {
+          "client_id": "121184558555-2rhfc9ff08e973vhopj2v9lfcm436lk3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "8f90c88a9e1950c87da1cf1b37d85563c38cb248"
+          }
+        },
+        {
+          "client_id": "121184558555-40d99pnvbn27uj0h5l9rr4foadcbfd3n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "755ba28516632dc9c88672b4b01cc0309bc295fd"
+          }
+        },
+        {
+          "client_id": "121184558555-4kua5p14ka5i77b17ia6gqepk5dkbnlg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "f6653891e3a3f2eb2d0428198512cbb9fc47b5c2"
+          }
+        },
+        {
+          "client_id": "121184558555-5j8a3s7tu8utegqtsjs3umk21h3734kt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "04199eb41821e4602940a06936dda67a66400f11"
+          }
+        },
+        {
+          "client_id": "121184558555-9hmvf44pf8trpto46uhu8ndpun83nhu7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "70164b203e4c5dac19c992bcdf5069ff0d667878"
+          }
+        },
+        {
+          "client_id": "121184558555-bfi7fd2njrlteq61n18sd01oisu339gm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "b66e11b771f28f70bf70cb69fc792da31fba1bbb"
+          }
+        },
+        {
+          "client_id": "121184558555-k0e5t1mkr3veat5opfeb9dg65hnmo1pj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "4c30be262ad0cbaac8c078aaa1010b46234a4ebb"
+          }
+        },
+        {
+          "client_id": "121184558555-md4i5orclrdbrdvlmketccaq3cvdhtd5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.com.ufc.mobile",
+            "certificate_hash": "0615fb71b5d3b125db76230ea6f343ee22584474"
+          }
+        },
+        {
+          "client_id": "121184558555-k8rjv6ofm34u6vpeq0c9ge0f76ed2bh6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcbUNpXWeQfVDqogm5D7rmPFPCGZj9XX8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "121184558555-3kjje6pfcbn08o2nt9sarum49ptku86p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "121184558555-3chie5v7d09outmo02p6924und263uqr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "sa.com.ufc.mobile",
+                "app_store_id": "6465952974"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

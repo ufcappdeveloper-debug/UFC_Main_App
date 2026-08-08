@@ -1,0 +1,307 @@
+name: ufc_mobile
+description: A new Flutter project.
+publish_to: "none"
+
+version: 1.1.152+261
+
+environment:
+  sdk: ">=3.3.3 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # open_filex:
+  #   git:
+  #     url: https://github.com/mufassalhussain/open_filex
+
+  intl: ^0.19.0
+  table_calendar: ^3.0.9
+  dio: ^5.8.0+1
+  crypto: ^3.0.3
+  lottie: ^3.3.1
+  pinput: ^5.0.1
+  shimmer: ^3.0.0
+  timeago: ^3.5.0
+  version: ^3.0.2
+  latlong2: ^0.9.1
+  corextra: ^1.1.1
+  location: ^8.0.0
+  camera: ^0.10.5+4
+  clipboard: ^0.1.3
+  equatable: ^2.0.7
+  geocoding: ^3.0.0
+  pinch_zoom: ^2.0.0
+  smart_auth: ^3.2.0
+  open_filex: ^4.7.0
+  expandable: ^5.0.1
+  adjust_sdk: ^5.1.1
+  collection: any
+  dotted_line: ^3.2.2
+  file_picker: ^9.0.0
+  share_plus: ^10.0.2
+  im_stepper: ^1.0.1+1
+  image_picker: ^1.1.2
+  app_settings: ^5.1.1
+  url_launcher: ^6.3.0
+  fluttertoast: ^8.2.2
+  map_launcher: ^3.5.0
+  path_provider: ^2.1.1
+  twitter_login: ^4.4.2
+  image_cropper: ^8.0.2
+  flutter_svg: ^2.0.10+1
+  dots_indicator: ^3.0.0
+  animated_digit: ^3.2.3
+  firebase_core: ^3.12.0
+  google_sign_in: ^6.2.2
+  device_preview: ^1.2.0
+  pull_to_refresh: ^2.0.0
+  carousel_slider: ^5.0.0
+  sentry_flutter: ^8.14.1
+  flutter_riverpod: ^2.6.1
+  dropdown_button2: ^2.3.9
+  email_validator: ^2.1.17
+  currency_picker: ^2.0.21
+  webview_flutter: ^4.10.0
+  adaptive_dialog: ^1.9.0+2
+  dotted_decoration: ^2.0.0
+  package_info_plus: ^8.0.2
+  connectivity_plus: ^6.0.5
+  device_info_plus: ^10.1.2
+  sign_in_with_apple: ^6.1.2
+  flutter_rating_bar: ^4.0.1
+  app_version_update: ^5.0.3
+  shared_preferences: ^2.3.2
+  riverpod_annotation: ^2.6.1
+  country_code_picker: ^3.0.0
+  easy_localization: ^3.0.7+1
+  firebase_analytics: ^11.4.3
+  firebase_messaging: ^15.2.3
+  flutter_vector_icons: ^2.0.0
+  google_maps_flutter: ^2.10.0
+  cached_network_image: ^3.4.1
+  draggable_bottom_sheet: ^1.0.2
+  flutter_otp_text_field: ^1.1.1
+  flutter_launcher_icons: ^0.13.1
+  loading_animation_widget: ^1.3.0
+  flutter_multi_formatter: ^2.13.0
+  flutter_local_notifications: ^17.2.2
+  month_picker_dialog: ^6.0.3
+  pinch_zoom_release_unzoom: ^2.0.0
+  agora_rtc_engine: ^6.5.2
+  permission_handler: ^11.4.0
+  flutter_easyloading: ^3.0.5
+  flutter_in_app_pip: ^1.7.4
+  socket_io_client: ^3.1.1
+  voice_message_package: ^2.2.1
+  camerawesome: ^2.4.0
+  font_awesome_flutter: ^10.8.0
+  flutter_pdfview: ^1.4.0+1
+  chewie: ^1.11.3
+  draggable_widget: ^2.0.0
+  flutter_sound: ^9.28.0
+  simple_pip_mode: ^1.1.0
+  tab_container: ^3.5.3
+  loading_indicator: ^3.1.1
+  chat_bubbles: ^1.7.0
+  flutter_chat_bubble: ^2.0.2
+  fl_chart: 1.0.0
+  pusher_channels_flutter: ^2.5.0
+  video_player: ^2.10.0
+  flutter_bloc: ^9.1.1
+  get_it: ^8.2.0
+  skeletonizer: ^2.1.0+1
+  clarity_flutter: ^1.4.3
+  audio_waveforms: ^1.3.0
+  readmore: ^3.0.0
+  visibility_detector: ^0.4.0+2
+  auto_size_text: ^3.0.0
+  flutter_widget_from_html_core: ^0.17.0
+  geolocator: ^14.0.2
+
+dependency_overrides:
+  web: ^0.5.1
+  intl: ^0.20.2
+  flutter_lints: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  custom_lint: ^0.7.3
+  build_runner: ^2.4.15
+  riverpod_lint: ^2.6.4
+  flutter_lints: ^5.0.0
+  riverpod_generator: ^2.6.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/ufc_new_logo.png"
+  image_path_android: "assets/images/ufc_new_logo.png"
+  adaptive_icon_background: "#ffffff"
+
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/json/
+    - assets/images/
+    - assets/images/logo/
+    - assets/images/home/
+    - assets/images/cart/
+    - assets/images/order/
+    - assets/translations/
+    - assets/images/review/
+    - assets/images/global/
+    - assets/images/station/
+    - assets/images/product/
+    - assets/images/profile/
+    - assets/images/support/
+    - assets/images/payment/
+    - assets/images/favorite/
+    - assets/images/card_logo/
+    - assets/images/navigation/
+    - assets/images/on_boarding/
+    - assets/images/authentication/
+    - assets/images/loyality_points/
+    - assets/images/dummy/
+    - assets/animations/
+    - assets/images/calling/
+    - assets/images/medical/example/
+    - assets/images/medical/logo/
+    - assets/images/medical/social/
+    - assets/images/medical/splash/
+    - assets/svg/agora/
+    - assets/svg/arrow/
+    - assets/svg/bottom_nav_bar/
+    - assets/svg/chat/
+    - assets/svg/global/
+    - assets/svg/placeholder/
+    - assets/svg/prescription/
+    - assets/svg/profile/
+    - assets/svg/top_bar/
+    - assets/images/app_bar/
+    - assets/svg/farm/
+    - assets/new_design/sample/
+    - assets/new_design/animations/
+    - assets/new_design/images/
+    - assets/new_design/icons/
+    - assets/svg/feed/
+    - assets/images/feed/
+
+  fonts:
+    - family: Kanit
+      fonts:
+        - asset: assets/fonts/Kanit-ExtraLight.ttf
+          weight: 100
+        - asset: assets/fonts/Kanit-Thin.ttf
+          weight: 200
+        - asset: assets/fonts/Kanit-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Kanit-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Kanit-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Kanit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Kanit-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Kanit-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Kanit-Black.ttf
+          weight: 900
+    - family: Alexandria
+      fonts:
+        - asset: assets/fonts/Alexandria-ExtraLight.ttf
+          weight: 100
+        - asset: assets/fonts/Alexandria-Thin.ttf
+          weight: 200
+        - asset: assets/fonts/Alexandria-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Alexandria-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Alexandria-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Alexandria-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Alexandria-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Alexandria-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Alexandria-Black.ttf
+          weight: 900          
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-ExtraLight.ttf
+          weight: 100
+        - asset: assets/fonts/Poppins-Thin.ttf
+          weight: 200
+        - asset: assets/fonts/Poppins-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Poppins-Black.ttf
+          weight: 900
+    - family: Nunito Sans
+      fonts:
+        - asset: assets/fonts/NunitoSans_10pt-ExtraLight.ttf
+          weight: 100
+        - asset: assets/fonts/NunitoSans_10pt-Light.ttf
+          weight: 300
+        - asset: assets/fonts/NunitoSans_10pt-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NunitoSans_10pt-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NunitoSans_10pt-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NunitoSans_10pt-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/NunitoSans_10pt-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/NunitoSans_10pt-Black.ttf
+          weight: 900
+    - family: SaudiRiyal
+      fonts:
+        - asset: assets/fonts/saudi_riyal.ttf
+    - family: Graphik Arabic
+      fonts:
+        - asset: assets/fonts/GraphikArabic-Extralight.ttf
+          weight: 100
+        - asset: assets/fonts/GraphikArabic-Thin.ttf
+          weight: 200
+        - asset: assets/fonts/GraphikArabic-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Graphik-Arabic-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/GraphikArabic-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Graphik-Arabic-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/GraphikArabic-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/GraphikArabic-Black.ttf
+          weight: 800
+        - asset: assets/fonts/GraphikArabic-Black.ttf
+          weight: 900
+    - family: GE Flow
+      fonts:
+        - asset: assets/fonts/GE-Flow-Bold.ttf
+    - family: Lobster
+      fonts:
+        - asset: assets/fonts/Lobster-Regular.ttf
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+    - family: DM Sans
+      fonts:
+        - asset: assets/fonts/DMSans-Font.ttf

@@ -1,0 +1,61 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:ufc_mobile/global/shared/constants/widgets.dart';
+
+class CustomPaginationFooter extends StatelessWidget {
+  const CustomPaginationFooter({
+    super.key,
+    required this.pageLimit,
+    this.emptyDataText,
+    this.height,
+  });
+
+  final String? pageLimit;
+  final String? emptyDataText;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomFooter(
+      builder: (context, mode) {
+        Widget body;
+        if (mode == LoadStatus.noMore || pageLimit == "empty") {
+          body = pullRefreshBody(
+            text: emptyDataText ?? "No More Data",
+            icon: Icons.error_outline_rounded,
+          );
+        } else if (mode == LoadStatus.idle) {
+          body = pullRefreshBody(
+            text: "Load More",
+            icon: Icons.arrow_downward_rounded,
+          );
+        } else if (mode == LoadStatus.loading) {
+          body = pullRefreshBody(
+            text: "Loading",
+            iconWidget: const CupertinoActivityIndicator(),
+          );
+        } else if (mode == LoadStatus.failed) {
+          body = pullRefreshBody(
+            text: "Error",
+            icon: Icons.error_outline_rounded,
+          );
+        } else if (mode == LoadStatus.canLoading) {
+          body = pullRefreshBody(
+            text: "Loading",
+            iconWidget: const CupertinoActivityIndicator(),
+          );
+        } else {
+          body = pullRefreshBody(
+            text: emptyDataText ?? "No More Data",
+            icon: Icons.error_outline_rounded,
+          );
+        }
+        return SizedBox(
+          height: height ?? 55.0,
+          child: Center(child: body),
+        );
+      },
+    );
+  }
+}
