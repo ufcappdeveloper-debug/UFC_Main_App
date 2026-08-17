@@ -2,7 +2,7 @@ name: ufc_mobile
 description: A new Flutter project.
 publish_to: "none"
 
-version: 1.1.152+261
+version: 1.1.153+262
 
 environment:
   sdk: ">=3.3.3 <4.0.0"
