@@ -100,12 +100,21 @@ class _DoctorAppointmentScreenState
 
     try {
       Future<BookingResponse> bookingFuture() async {
+        // Sanitize and validate the start time
+        final sanitizedStartTime = startTime;
+        if (sanitizedStartTime.isEmpty) {
+          throw Exception('Invalid booking time format');
+        }
+
+        // Ensure notes don't contain problematic characters
+        final sanitizedNotes = _noteController.text.trim();
+
         final model = BookAppoinmentModel(
           doctorId: widget.doctorId,
-          startTime: startTime,
+          startTime: sanitizedStartTime,
           duration: selectedDuration.toString(),
           animalUniqueKey: _selectedAnimalKey,
-          notes: _noteController.text.trim(),
+          notes: sanitizedNotes.isNotEmpty ? sanitizedNotes : null,
         );
 
         if (widget.forEditBooking) {
@@ -1033,14 +1042,37 @@ class _DoctorAppointmentScreenState
 
   String get startTime {
     if (selectedDate == null || selectedTime.trim().isEmpty) return '';
-    selectedDate = DateTime(
-      selectedDate!.year,
-      selectedDate!.month,
-      selectedDate!.day,
-      int.parse(selectedTime.split(":")[0]),
-      int.parse(selectedTime.split(":")[1]),
-    ).toUtc();
-    return selectedDate!.toIso8601String();
+
+    try {
+      // Convert Arabic digits to English before parsing
+      String normalizedTime = convertArabicDigitsToEnglish(selectedTime.trim());
+
+      // Validate time format
+      final timeParts = normalizedTime.split(":");
+      if (timeParts.length != 2) return '';
+
+      final hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
+
+      // Validate hour and minute ranges
+      if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+        return '';
+      }
+
+      // Create UTC datetime without modifying selectedDate
+      final utcDateTime = DateTime(
+        selectedDate!.year,
+        selectedDate!.month,
+        selectedDate!.day,
+        hour,
+        minute,
+      ).toUtc();
+
+      return utcDateTime.toIso8601String();
+    } catch (e) {
+      // If parsing fails, return empty string
+      return '';
+    }
   }
 }
 
