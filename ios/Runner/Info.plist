@@ -56,6 +56,16 @@
 					<string>twittersdk</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>Adjust</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>adjustsivdl3vawzy8</string>
+				</array>
+			</dict>
 		</array>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>

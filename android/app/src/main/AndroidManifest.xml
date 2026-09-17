@@ -19,6 +19,9 @@
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
     tools:node="remove" />
 
+  <!-- Adjust SDK permissions -->
+  <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+
   <!-- <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/> -->
   <application android:label="UFC" android:name="${applicationName}"
     android:icon="@mipmap/ic_launcher">
@@ -66,6 +69,13 @@
         <data android:scheme="https" android:host="ufc.go.link" />
         <!-- Custom scheme support -->
         <data android:scheme="ufc" android:host="*" android:pathPrefix="/" />
+      </intent-filter>
+      <!-- Adjust SDK Deep Link -->
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="adjustsivdl3vawzy8" />
       </intent-filter>
       <!-- Twitter Social Login -->
       <intent-filter>

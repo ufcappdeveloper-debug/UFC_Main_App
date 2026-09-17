@@ -7,5 +7,5 @@
     "Iqama",
     "SADAD"
   ],
-  "dart.flutterSdkPath": ".fvm/versions/3.32.0"
+  "dart.flutterSdkPath": ".fvm/flutter_sdk"
 }
