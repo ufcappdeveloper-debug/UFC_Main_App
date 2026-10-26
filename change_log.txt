@@ -1,0 +1,35 @@
+Release notes — October 2026 update (backend changes 03–17 Oct 2026)
+
+FEED
+- New Home: "Buy from Station" and "Buy from Distributor" cards (design: Feed - Home v2).
+  The Products tab remembers the channel picked on Home.
+- Distributors (new sales channel):
+  - Distributor list sheet with search, distance (when location is allowed), Map, open/closed state.
+  - Distributor products: category tabs, search, sort/filter, offer prices, out-of-stock state, favorites.
+  - Product details with quantity and Add to cart.
+  - Separate distributor cart ("Station | Distributors" switch in the cart); one distributor per cart
+    ("Start a new cart?" when adding from another distributor).
+  - Checkout shows only the order types and payment methods the distributor has switched on
+    (pickup with address and map / delivery with fee and address; cash / bank transfer).
+  - Bank transfer: amount, reference and bank accounts with copy buttons (IBAN copied without spaces)
+    on the checkout, the success screen and the order details (while unpaid).
+  - My Orders: distributor orders show the distributor, product names and a "Distributor" badge;
+    "Reorder" refills the distributor cart.
+  - Favorites: "Station | Distributors" tabs.
+- Cart tab badge shows the shop + distributor cart count.
+- Shop checkout:
+  - A coupon below its minimum order amount is no longer applied.
+  - Orders with nothing left to pay (e.g. 100% coupon) go straight to the success screen.
+  - The selected delivery date is now sent with delivery orders.
+  - The cart is cleared after a MADA payment.
+  - Cart refreshes when an item no longer belongs to the user (404).
+
+FARM
+- Editing a vaccine or a death with an invalid date keeps the sheet open and shows the error.
+- Date pickers no longer allow future dates (except "Expected" dates) or dates before the animal's birth.
+- Bulk vaccination shows how many animals were skipped.
+- Report questions reload for the selected animal; reports that don't apply (e.g. productive status
+  for a male) show the reason instead of the form.
+- Farm members: list, add (by mobile number), edit (number read-only), delete.
+- Farm switcher for members ("My farm" / owner's farm); members work on the owner's farm.
+  Members and finance items are hidden when not allowed. Removed members are switched back to "My farm".

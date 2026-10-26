@@ -6,7 +6,21 @@ import 'package:ufc_mobile/global/util/station/station_utils.dart';
 import '../../screens/feed/domain/entities/station/station_model.dart';
 import '../shared/widgets/custom_widgets/custom_text.dart';
 
-Future<void> openMapsWidget(StationModel station, BuildContext context) async {
+Future<void> openMapsWidget(StationModel station, BuildContext context) =>
+    openMapsAt(
+      context,
+      latitude: station.latitude ?? 0.0,
+      longitude: station.longitude ?? 0.0,
+      title: StationUtils.stationName(station),
+    );
+
+/// Shows the installed map apps and opens a marker at the given location.
+Future<void> openMapsAt(
+  BuildContext context, {
+  required double latitude,
+  required double longitude,
+  required String title,
+}) async {
   final availableMaps = await MapLauncher.installedMaps;
   if (!context.mounted) {
     return;
@@ -52,11 +66,8 @@ Future<void> openMapsWidget(StationModel station, BuildContext context) async {
                           return InkWell(
                             onTap: () {
                               availableMaps[index].showMarker(
-                                coords: Coords(
-                                  station.latitude ?? 0.0,
-                                  station.longitude ?? 0.0,
-                                ),
-                                title: StationUtils.stationName(station),
+                                coords: Coords(latitude, longitude),
+                                title: title,
                               );
                               Navigator.of(ctx).pop();
                             },

@@ -319,74 +319,73 @@ extension StringX on String {
       isNotEmpty ? '${this[0].toUpperCase()}${substring(1)}' : null;
 }
 
+// CustomText(
+//   text: 'Animal Fertility Count',
+//   fontSize: 15,
+//   fontFamily: isArOrUr ? 'Graphik Arabic' : 'Kanit',
+// ),
+// kHeight5,
+// kHeight10,
+// LayoutBuilder(
+//   builder: (context, constraints) {
+//     final sliderWidth = constraints.maxWidth;
+//     final position =
+//         (_currentRangeValues.end / 200) * sliderWidth;
 
-                    // CustomText(
-                    //   text: 'Animal Fertility Count',
-                    //   fontSize: 15,
-                    //   fontFamily: isArOrUr ? 'Graphik Arabic' : 'Kanit',
-                    // ),
-                    // kHeight5,
-                    // kHeight10,
-                    // LayoutBuilder(
-                    //   builder: (context, constraints) {
-                    //     final sliderWidth = constraints.maxWidth;
-                    //     final position =
-                    //         (_currentRangeValues.end / 200) * sliderWidth;
-
-                    //     return Stack(
-                    //       clipBehavior: Clip.none,
-                    //       alignment: Alignment.centerLeft,
-                    //       children: [
-                    //         Positioned(
-                    //           left: position -
-                    //               (_currentRangeValues.end > 50 ? 15 : 5),
-                    //           bottom: 10,
-                    //           child: CustomText(
-                    //             text: '${_currentRangeValues.end.toInt()}',
-                    //             fontSize: 12,
-                    //             color: AppColors.farmColor,
-                    //             fontWeight: FontWeight.w600,
-                    //           ),
-                    //         ),
-                    //         Positioned(
-                    //           left: 0,
-                    //           bottom: 10,
-                    //           child: CustomText(
-                    //             text: '0',
-                    //             fontSize: 12,
-                    //             color: AppColors.farmColor,
-                    //             fontWeight: FontWeight.w600,
-                    //           ),
-                    //         ),
-                    //         SliderTheme(
-                    //           data: SliderTheme.of(context).copyWith(
-                    //             trackHeight: 4,
-                    //             overlayShape: SliderComponentShape.noOverlay,
-                    //             thumbShape: const RoundSliderThumbShape(
-                    //                 enabledThumbRadius: 6),
-                    //             rangeThumbShape:
-                    //                 const RoundRangeSliderThumbShape(
-                    //                     enabledThumbRadius: 6,
-                    //                     elevation: 3,
-                    //                     pressedElevation: 3),
-                    //           ),
-                    //           child: RangeSlider(
-                    //             values: _currentRangeValues,
-                    //             min: 0,
-                    //             max: 200,
-                    //             divisions: 200,
-                    //             labels: null,
-                    //             activeColor: AppColors.farmColor,
-                    //             inactiveColor: Colors.green.shade100,
-                    //             onChanged: (RangeValues values) {
-                    //               setState(() {
-                    //                 _currentRangeValues =
-                    //                     RangeValues(0, values.end);
-                    //               });
-                    //             },
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     );
-                    //   },
-                    // ),
+//     return Stack(
+//       clipBehavior: Clip.none,
+//       alignment: Alignment.centerLeft,
+//       children: [
+//         Positioned(
+//           left: position -
+//               (_currentRangeValues.end > 50 ? 15 : 5),
+//           bottom: 10,
+//           child: CustomText(
+//             text: '${_currentRangeValues.end.toInt()}',
+//             fontSize: 12,
+//             color: AppColors.farmColor,
+//             fontWeight: FontWeight.w600,
+//           ),
+//         ),
+//         Positioned(
+//           left: 0,
+//           bottom: 10,
+//           child: CustomText(
+//             text: '0',
+//             fontSize: 12,
+//             color: AppColors.farmColor,
+//             fontWeight: FontWeight.w600,
+//           ),
+//         ),
+//         SliderTheme(
+//           data: SliderTheme.of(context).copyWith(
+//             trackHeight: 4,
+//             overlayShape: SliderComponentShape.noOverlay,
+//             thumbShape: const RoundSliderThumbShape(
+//                 enabledThumbRadius: 6),
+//             rangeThumbShape:
+//                 const RoundRangeSliderThumbShape(
+//                     enabledThumbRadius: 6,
+//                     elevation: 3,
+//                     pressedElevation: 3),
+//           ),
+//           child: RangeSlider(
+//             values: _currentRangeValues,
+//             min: 0,
+//             max: 200,
+//             divisions: 200,
+//             labels: null,
+//             activeColor: AppColors.farmColor,
+//             inactiveColor: Colors.green.shade100,
+//             onChanged: (RangeValues values) {
+//               setState(() {
+//                 _currentRangeValues =
+//                     RangeValues(0, values.end);
+//               });
+//             },
+//           ),
+//         ),
+//       ],
+//     );
+//   },
+// ),

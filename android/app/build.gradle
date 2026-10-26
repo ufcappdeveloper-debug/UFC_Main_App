@@ -91,6 +91,13 @@ android {
            shrinkResources false
            signingConfig signingConfigs.release
        }
+       debug {
+           // Sign debug builds with the app key when key.properties is present,
+           // so Google sign-in (registered for this key's SHA-1) works in debug.
+           if (keystorePropertiesFile.exists()) {
+               signingConfig signingConfigs.release
+           }
+       }
    }
 }
 

@@ -16,6 +16,8 @@ import '../../../../global/shared/widgets/loading/loading_dialog.dart';
 import '../../../../global/shared/widgets/show_confirmation_dailog.dart';
 import '../../application/get_question/get_question_cubit.dart';
 import '../../application/livestock_details/livestock_details_cubit.dart';
+import '../../application/animal_dates/animal_dates_loader.dart';
+import '../../domain/services/farm_date_rules.dart';
 
 class VaccinationPopup extends StatefulWidget {
   final int id;
@@ -47,6 +49,20 @@ class _VaccinationPopupState extends State<VaccinationPopup> {
 
   String? errorMsg;
   bool isLoading = false;
+
+  /// The animal's known dates (birth, death, records, vaccinations).
+  AnimalDates? get _dates =>
+      AnimalDatesLoader.fromState(context.read<LiveStockDetailsCubit>().state);
+
+  /// Type of the vaccination being edited (for the same-day check).
+  int? get _vaccineTypeId => _dates?.vaccinations
+      .where((v) => v.id == widget.id)
+      .firstOrNull
+      ?.vaccineTypeId;
+
+  String? _validate(DateTime d) =>
+      FarmDateRules.validate(FarmDateKind.vaccination, d, _dates,
+          vaccineTypeId: _vaccineTypeId, editingVaccinationId: widget.id);
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +104,13 @@ class _VaccinationPopupState extends State<VaccinationPopup> {
                           kHeight10,
                           CustomDatePicker(
                               needFormat: false,
+                              minimumDate: FarmDateRules.range(
+                                      FarmDateKind.vaccination, _dates)
+                                  .min,
+                              maximumDate: FarmDateRules.range(
+                                      FarmDateKind.vaccination, _dates)
+                                  .max,
+                              validateDate: _validate,
                               hintText: 'Enter the date'.tr(),
                               onDateSelect: (date) {},
                               controller: dateController),
@@ -129,26 +152,54 @@ class _VaccinationPopupState extends State<VaccinationPopup> {
                                   fill: true,
                                   title: 'Update'.tr(),
                                   onTap: () async {
+                                    if (dateController.text.isEmpty ||
+                                        durationController.text.isEmpty) {
+                                      setModalState(() => errorMsg =
+                                          'Please enter vaccine details'.tr());
+                                      return;
+                                    }
+                                    final picked = FarmDateRules.parse(
+                                        dateController.text);
+                                    final dateError = (picked == null
+                                            ? null
+                                            : _validate(picked)) ??
+                                        FarmDateRules.validateWithdrawal(
+                                            durationController.text);
+                                    if (dateError != null) {
+                                      setModalState(() => errorMsg = dateError);
+                                      return;
+                                    }
                                     final param = {
                                       "id": widget.id,
                                       "vaccination_date": dateController.text,
                                       "prohibition_period":
                                           durationController.text
                                     };
+                                    final questionCubit =
+                                        context.read<GetQuestionCubit>();
+                                    final detailsCubit =
+                                        context.read<LiveStockDetailsCubit>();
                                     setModalState(() {
                                       errorMsg = null;
                                       isLoading = true;
                                     });
-                                    errorMsg = await context
-                                        .read<GetQuestionCubit>()
-                                        .editVaccine(param);
+                                    final error =
+                                        await questionCubit.editVaccine(param);
+                                    if (!context.mounted) return;
 
-                                    setModalState(() {
-                                      isLoading = false;
-                                    });
+                                    // Keep the sheet open on a validation
+                                    // error (e.g. date before birth) so the
+                                    // message is visible.
+                                    if (error != null) {
+                                      setModalState(() {
+                                        isLoading = false;
+                                        errorMsg = error;
+                                      });
+                                      return;
+                                    }
+                                    setModalState(() => isLoading = false);
                                     Navigator.pop(context);
-                                    await context
-                                        .read<LiveStockDetailsCubit>()
+                                    await detailsCubit
                                         .getLivestockDetails(widget.animalKey);
                                   },
                                 ),

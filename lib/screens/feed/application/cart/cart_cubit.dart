@@ -77,6 +77,7 @@ class CartCubit extends Cubit<CartState> {
       // fetch updated cart
       final response = await getCartUseCase();
       final count = await getCartCountUseCase();
+      lastCount = count;
 
       // emit CartLoaded directly with updated cart and count
       emit(CartAdded());
@@ -140,9 +141,14 @@ class CartCubit extends Cubit<CartState> {
     } catch (e) {
       // Remove loading state on error
       emit(current.copyWith(updatingItemIds: {}));
+      if (_isNotFound(e)) return fetchCart();
       emit(CartError(e.toString()));
     }
   }
+
+  /// The API returns 404 for a cart item that isn't the user's (any more).
+  bool _isNotFound(Object e) =>
+      e is DioException && e.response?.statusCode == 404;
 
   Future<void> decrementQuantity(int id) async {
     try {
@@ -175,6 +181,7 @@ class CartCubit extends Cubit<CartState> {
           updatingItemIds: {},
         ));
       }
+      if (_isNotFound(e)) return fetchCart();
       emit(CartError(e.toString()));
     }
   }
@@ -185,6 +192,7 @@ class CartCubit extends Cubit<CartState> {
       await fetchCart();
       await fetchCartCount();
     } on DioException catch (e) {
+      if (_isNotFound(e)) return fetchCart();
       emit(CartError(e.dioMessage));
     } catch (e) {
       emit(CartError(e));
@@ -212,14 +220,21 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
+  /// Last known shop cart count, available in any state (bottom-bar badge).
+  int lastCount = 0;
+
   Future<void> fetchCartCount() async {
     try {
       final count = await getCartCountUseCase();
+      lastCount = count;
 
       final currentState = state;
       if (currentState is CartLoaded) {
         // emit updated state with new cartCount
         emit(currentState.copyWith(cartCount: count));
+      } else if (currentState is CartInitial ||
+          currentState is CartCountLoaded) {
+        emit(CartCountLoaded(count));
       }
     } on DioException catch (e) {
       emit(CartError(e.dioMessage));

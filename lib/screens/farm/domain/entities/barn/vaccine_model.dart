@@ -25,6 +25,21 @@ class VaccineModel {
 
   String get vaccineName =>
       isArabic ? vaccineAr ?? vaccineEn ?? '' : vaccineEn ?? '';
+
+  /// The "Other / أخرى" vaccine type: the user types the vaccine name.
+  bool get isOther {
+    final values = [vaccineEn, vaccineAr]
+        .whereType<String>()
+        .map((v) => v.trim().toLowerCase());
+    return values.any((v) =>
+        v == 'other' ||
+        v == 'others' ||
+        v.startsWith('other ') ||
+        v.startsWith('أخرى') ||
+        v.startsWith('اخرى') ||
+        v.startsWith('أخري') ||
+        v.startsWith('اخري'));
+  }
 }
 
 class VaccineParam {
@@ -54,14 +69,23 @@ class VaccineParam {
 }
 
 class VaccineSchedules {
+  /// API field for the name typed for an "Other" vaccine.
+  static const otherNameField = 'vaccine_name';
+
   int? vaccineTypeId;
   int? prohibitionPeriod;
   String? vaccinationDate;
+
+  /// Set for the "Other" vaccine type.
+  bool isOther;
+  String? otherName;
 
   VaccineSchedules({
     this.vaccineTypeId,
     this.prohibitionPeriod,
     this.vaccinationDate,
+    this.isOther = false,
+    this.otherName,
   });
 
   Map<String, dynamic> toJson() {
@@ -69,6 +93,8 @@ class VaccineSchedules {
       if (vaccineTypeId != null) "vaccine_type_id": vaccineTypeId,
       if (prohibitionPeriod != null) "prohibition_period": prohibitionPeriod,
       if (vaccinationDate != null) "vaccination_date": vaccinationDate,
+      if (isOther && (otherName?.trim().isNotEmpty ?? false))
+        otherNameField: otherName!.trim(),
     };
   }
 }

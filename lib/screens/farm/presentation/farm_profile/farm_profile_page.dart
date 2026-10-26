@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' hide Consumer;
+import 'package:ufc_mobile/screens/farm/application/members/farm_account_cubit.dart';
 import 'package:ufc_mobile/global/extensions/app_png_images.dart';
 import 'package:ufc_mobile/global/util/common/logout_handler.dart';
 
@@ -25,6 +27,9 @@ class FarmProfilePage extends ConsumerStatefulWidget {
 class _FarmProfilePageState extends ConsumerState<FarmProfilePage> {
   @override
   Widget build(BuildContext context) {
+    // Members are managed on the user's own farm only; finance screens need
+    // finance access on the selected farm.
+    final farm = context.watch<FarmAccountCubit>().state;
     final List<FarmProfileItems> expansionTiles = [
       FarmProfileItems(
         icon: AppPngImages.profileFarmPngIcon,
@@ -33,7 +38,8 @@ class _FarmProfilePageState extends ConsumerState<FarmProfilePage> {
           FarmProfileChildItem(value: 'Barns', needArrow: true),
           // FarmProfileChildItem(value: 'Veterinary Clinic', needArrow: true),
           // FarmProfileChildItem(value: 'Medications', needArrow: true),
-          FarmProfileChildItem(value: 'Members', needArrow: true),
+          if (!farm.isOnOwnerFarm)
+            FarmProfileChildItem(value: 'Members', needArrow: true),
         ],
       ),
       FarmProfileItems(
@@ -41,7 +47,8 @@ class _FarmProfilePageState extends ConsumerState<FarmProfilePage> {
         title: 'Reports & Statistics',
         children: [
           FarmProfileChildItem(value: 'Reports', needArrow: true),
-          FarmProfileChildItem(value: 'Expenses and Sales', needArrow: true),
+          if (farm.canViewFinance)
+            FarmProfileChildItem(value: 'Expenses and Sales', needArrow: true),
           FarmProfileChildItem(
               value: 'Critical Livestock Assets', needArrow: true),
           FarmProfileChildItem(value: 'Transfer Request', needArrow: true),

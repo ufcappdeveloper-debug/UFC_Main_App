@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:ufc_mobile/global/config/config.dart';
+import 'package:ufc_mobile/global/config/farm_session.dart';
 import 'package:ufc_mobile/main.dart';
 import 'package:ufc_mobile/global/util/analytic/sentry_tracker.dart';
 import 'package:ufc_mobile/global/util/dio/dio_utils.dart';
@@ -11,11 +12,15 @@ class AppInterceptor extends Interceptor {
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     // Add authorization token to request headers if available
+    // (Never log the token: logs can end up in bug reports.)
     if (AppConfig.token != null) {
-      // Log request token
-      debugLog('Token: ${AppConfig.token!}');
-      print('Token: ${AppConfig.token!}');
       options.headers['Authorization'] = 'Bearer ${AppConfig.token}';
+    }
+
+    // A farm member working on an owner's farm (not for /members calls).
+    final ownerId = FarmSession.ownerId;
+    if (ownerId != null && FarmSession.appliesTo(options.path)) {
+      options.headers['X-Owner-Id'] = ownerId.toString();
     }
 
     // Log request details to Sentry
@@ -27,7 +32,7 @@ class AppInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
     // Log response token
-    debugLog("response is ${response.data.toString()}");
+    debugLog("response is ${redactSecrets(response.data)}");
 
     // Log response details to Sentry
     SentryTracker.recordResponse(response);
@@ -74,6 +79,14 @@ class AppInterceptor extends Interceptor {
           : null;
 
       debugLog('Response Data: $responseData');
+
+      // Removed from the owner's farm: back to "My farm".
+      if (responseStatusCode == 403 &&
+          FarmSession.ownerId != null &&
+          FarmSession.appliesTo(err.requestOptions.path)) {
+        FarmSession.reportAccessRevoked(
+            message?.toString() ?? 'Not a member of this account');
+      }
 
       switch (responseStatusCode) {
         case 400:

@@ -26,7 +26,8 @@ class MyOrdersRemoteDataSourceImpl implements MyOrdersRemoteDataSource {
   Future<OrderListModel?> getOrderDetails(Map<String, dynamic> params) async {
     try {
       Response response =
-          await api.get("api/ufc/v1/get_order_summary", data: params);
+          await api.get("api/ufc/v1/get_order_summary",
+              queryParameters: params);
       OrderListModel? orderListModel =
           OrderResponseModel.fromJson(response.data).orders;
       return orderListModel;

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -23,7 +22,7 @@ class DashboardShimmer extends StatelessWidget {
                 kWidth15,
                 Expanded(child: _cardPlaceholder()),
               ],
-            ),  
+            ),
             const SizedBox(height: 20),
             Container(
               height: 230,
@@ -96,14 +95,12 @@ class LivestockShimmer extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-
             Container(
               height: 18,
               width: 120,
               color: Colors.white,
             ),
             const SizedBox(height: 16),
-
             Wrap(
               spacing: 12,
               runSpacing: 12,
@@ -119,7 +116,6 @@ class LivestockShimmer extends StatelessWidget {
               }),
             ),
             const SizedBox(height: 30),
-
             Align(
               alignment: Alignment.bottomRight,
               child: Container(

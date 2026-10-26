@@ -223,7 +223,7 @@ class _LiveStockPageState extends ConsumerState<LivestockPage> {
                                     ? AppFontsFamily.english
                                     : AppFontsFamily.arabic,
                                 textStyle:
-                                    PetVeterinaryFontstyles.kanitMedium16,
+                                    PetVeterinaryFontstyles.kanitMedium16.copyWith(fontFamily: AppFontsFamily.alexandria),
                               ),
                               kHeight15,
                               recentlyAddedList(
@@ -272,7 +272,7 @@ class _LiveStockPageState extends ConsumerState<LivestockPage> {
                 child: CustomText(
                   fontSize: 15,
                   textAlign: TextAlign.center,
-                  fontFamily: isArOrUr ? 'Graphik Arabic' : 'Kanit',
+                  fontFamily: AppFontsFamily.alexandria,
                   text: 'No livestock have been added yet',
                 ),
               );

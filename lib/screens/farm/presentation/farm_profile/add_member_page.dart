@@ -10,10 +10,20 @@ import 'package:ufc_mobile/screens/farm/presentation/charts/weight_chart.dart';
 import '../../../../global/extensions/app_colors.dart';
 import '../widgets/farm_appbar.dart';
 import '../widgets/farm_text_field.dart';
+import '../../application/members/members_cubit.dart';
+import '../../domain/entities/member/farm_member_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ufc_mobile/global/shared/widgets/custom_widgets/custom_snack_bar.dart';
 
 class AddMemberORContactUs extends ConsumerStatefulWidget {
   final bool formContactUs;
-  const AddMemberORContactUs({super.key, required this.formContactUs});
+
+  /// Edit mode when set (the mobile number is read-only then). Saving needs
+  /// a [MembersCubit] above this page.
+  final FarmMemberModel? member;
+
+  const AddMemberORContactUs(
+      {super.key, required this.formContactUs, this.member});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _AddMemberPageState();
@@ -28,13 +38,17 @@ class _AddMemberPageState extends ConsumerState<AddMemberORContactUs> {
   final _formKey = GlobalKey<FormState>();
 
   bool allow = false;
+  bool saving = false;
+
+  bool get isEdit => widget.member != null;
 
   @override
   void initState() {
-    nameController = TextEditingController();
-    emailController = TextEditingController();
-    phoneController = TextEditingController();
+    nameController = TextEditingController(text: widget.member?.name);
+    emailController = TextEditingController(text: widget.member?.email);
+    phoneController = TextEditingController(text: widget.member?.phoneNumber);
     msgController = TextEditingController();
+    allow = widget.member?.canViewFinance ?? false;
     super.initState();
   }
 
@@ -47,17 +61,25 @@ class _AddMemberPageState extends ConsumerState<AddMemberORContactUs> {
     super.dispose();
   }
 
-  void _saveMember() {
-    if (_formKey.currentState!.validate()) {
-      Fluttertoast.showToast(
-        msg: 'Not available at the moment'.tr(),
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+  Future<void> _saveMember() async {
+    if (saving || !_formKey.currentState!.validate()) return;
+    setState(() => saving = true);
+    final error = await context.read<MembersCubit>().save(
+          existing: widget.member,
+          name: nameController.text.trim(),
+          phoneNumber: phoneController.text.trim(),
+          countryCode: widget.member?.countryCode ?? '+966',
+          email: emailController.text.trim(),
+          canViewFinance: allow,
+        );
+    if (!mounted) return;
+    setState(() => saving = false);
+    if (error != null) {
+      CustomSnackBar.error(context, error);
+      return;
     }
+    CustomSnackBar.success(context, isEdit ? 'Member updated' : 'Member added');
+    Navigator.of(context).pop(true);
   }
 
   void _sendMsg() {
@@ -77,16 +99,24 @@ class _AddMemberPageState extends ConsumerState<AddMemberORContactUs> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomFarmAppBar(
-          title: widget.formContactUs ? 'Contact Us' : 'Add New Member'),
-      floatingActionButton: Padding(
+          title: widget.formContactUs
+              ? 'Contact Us'
+              : (isEdit ? 'Edit Member' : 'Add New Member')),
+      // Hidden while the keyboard is open, so it never covers a field.
+      floatingActionButton: MediaQuery.viewInsetsOf(context).bottom > 0
+          ? null
+          : Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
         child: GestureDetector(
           onTap: widget.formContactUs ? _sendMsg : _saveMember,
-          child: CustomOutlinedContainer(
-            title: widget.formContactUs ? 'Send' : 'Save',
-            fill: true,
-            fillColor: AppColors.farmColor,
-          ),
+          child: saving
+              ? const Center(
+                  child: CircularProgressIndicator(color: AppColors.farmColor))
+              : CustomOutlinedContainer(
+                  title: widget.formContactUs ? 'Send' : 'Save',
+                  fill: true,
+                  fillColor: AppColors.farmColor,
+                ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -138,7 +168,19 @@ class _AddMemberPageState extends ConsumerState<AddMemberORContactUs> {
                     }
                     return null;
                   },
+                  readOnly: isEdit && !widget.formContactUs,
                 ),
+                if (isEdit && !widget.formContactUs)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: CustomText(
+                      text:
+                          'To change the number, delete and re-add the member',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.grey,
+                    ),
+                  ),
                 if (widget.formContactUs)
                   memberTextField(
                     'Message',
@@ -193,7 +235,8 @@ class _AddMemberPageState extends ConsumerState<AddMemberORContactUs> {
 
   Column memberTextField(String title, String hintText,
       {required TextEditingController controller,
-      String? Function(String?)? validator}) {
+      String? Function(String?)? validator,
+      bool readOnly = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -210,6 +253,7 @@ class _AddMemberPageState extends ConsumerState<AddMemberORContactUs> {
             hintText: hintText,
             controller: controller,
             validator: validator,
+            readOnly: readOnly,
             isMsg: controller == msgController,
             isPhone: controller == phoneController,
             keyboardType:

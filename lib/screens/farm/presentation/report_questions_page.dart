@@ -33,6 +33,8 @@ import '../../navigation/pages/bottom_nav_bar.dart';
 import 'livestock/livestock_details_page.dart';
 import 'widgets/add_option_button.dart';
 import 'widgets/animal_ref_widget.dart';
+import '../application/animal_dates/animal_dates_loader.dart';
+import '../domain/services/farm_date_rules.dart';
 import 'widgets/farm_appbar.dart';
 import 'widgets/report_question_component.dart';
 import 'widgets/type_of_vaccinations.dart';
@@ -109,9 +111,14 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
 
   void _loadData() async {
     await _checkReportType(context, widget.id);
+    if (isNewBorn) {
+      _loadMotherDates(widget.animalKey);
+    } else {
+      _loadAnimalDates(widget.animalKey);
+    }
     await ref
         .read(reportCategoryQuestionsProvider.notifier)
-        .getQuestions(widget.id);
+        .getQuestions(widget.id, animalKey: widget.animalKey);
     if (isLivestock) {
       await ref.read(barnAsyncProvider.notifier).getBarn();
       animalUniqueKey = await getAnimalKey();
@@ -157,8 +164,167 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
     }
   }
 
+  /// Known dates of the selected animal (for a newborn report: the mother;
+  /// for Add Livestock: the mother's life span), used by the date rules.
+  AnimalDates? _animalDates;
+  String? _datesForKey;
+  String? _motherKey;
+
+  Future<void> _loadAnimalDates(String? animalKey) async {
+    if (animalKey == null || animalKey == _datesForKey) return;
+    _datesForKey = animalKey;
+    final dates = await AnimalDatesLoader.load(animalKey);
+    if (!mounted || _datesForKey != animalKey) return;
+    setState(() => _animalDates = dates);
+  }
+
+  /// The mother chosen in the form (Add Livestock / newborn report).
+  Future<void> _loadMotherDates(String? motherKey) async {
+    if (motherKey == null || motherKey.isEmpty || motherKey == _motherKey) {
+      return;
+    }
+    _motherKey = motherKey;
+    final mother = await AnimalDatesLoader.load(motherKey);
+    if (!mounted || _motherKey != motherKey) return;
+    setState(() {
+      // Newborn report: the birth date must fall within the mother's life,
+      // so the mother is the reference animal. Add Livestock: keep the
+      // mother's life span as limits for the new animal's birth date.
+      _animalDates = isNewBorn
+          ? mother
+          : (_animalDates ?? AnimalDates.empty).withMother(mother);
+    });
+  }
+
+  /// The animal's dates plus the birth date typed in this form (Add
+  /// Livestock), so the form's other dates can't come before it.
+  AnimalDates? get _formDates {
+    if (isNewBorn) return _animalDates;
+    final questions = ref.read(reportCategoryQuestionsProvider).value ?? [];
+    for (final a in answersList) {
+      if (a['answer_type'] != 'date_answer') continue;
+      final q = _findQuestion(questions, a['report_question_id']);
+      if (FarmDateRules.kindOf(q) != FarmDateKind.birth) continue;
+      final birth = FarmDateRules.parse(a['answer']?.toString());
+      if (birth != null) {
+        return (_animalDates ?? AnimalDates.empty).withBirth(birth);
+      }
+    }
+    return _animalDates;
+  }
+
+  /// Every date (and "Other" value) in the form, checked before anything
+  /// is sent.
+  String? _validateDates() {
+    final dates = _formDates;
+    if (isDeath) {
+      final d = FarmDateRules.parse(deathDateController.text);
+      if (d != null) {
+        final error = FarmDateRules.validate(FarmDateKind.death, d, dates);
+        if (error != null) return error;
+      }
+    }
+    if (isVaccination) {
+      final seen = <String>{};
+      for (final v in vaccinationData ?? const <VaccineSchedules>[]) {
+        if (v.isOther && (v.otherName?.trim().isEmpty ?? true)) {
+          return 'Please enter the vaccine name for "Other"'.tr();
+        }
+        final error = FarmDateRules.validateWithdrawal(
+            v.prohibitionPeriod?.toString());
+        if (error != null) return error;
+        final d = FarmDateRules.parse(v.vaccinationDate);
+        if (d == null) continue;
+        final dateError = FarmDateRules.validate(
+            FarmDateKind.vaccination, d, dates,
+            vaccineTypeId: v.vaccineTypeId);
+        if (dateError != null) return dateError;
+        // The same vaccine twice on the same day in this form.
+        if (!seen.add('${v.vaccineTypeId}-${FarmDateRules.format(d)}')) {
+          return 'vaccine_same_day'.tr();
+        }
+      }
+    }
+    final questions = ref.read(reportCategoryQuestionsProvider).value ?? [];
+    // "Other" needs the user's own value.
+    for (final a in answersList) {
+      final contentId = a['report_question_content_id'];
+      if (contentId == null) continue;
+      final q = _findQuestion(questions, a['report_question_id']);
+      final content =
+          q?.contents?.where((c) => c.id == contentId).firstOrNull;
+      if (content == null || !ReportQuestionComponent.isOtherOption(content)) {
+        continue;
+      }
+      final followUp = ReportQuestionComponent.otherTextFollowUp(content);
+      final typed = followUp == null
+          ? a['answer']
+          : answersList
+              .where((x) => x['report_question_id'] == followUp.id)
+              .firstOrNull?['answer'];
+      if (typed?.toString().trim().isEmpty ?? true) {
+        return 'Please specify the "Other" value'.tr();
+      }
+    }
+    final mating = FarmDateRules.matingDateFrom(answersList);
+    for (final a in answersList) {
+      if (a['answer_type'] != 'date_answer') continue;
+      final d = FarmDateRules.parse(a['answer']?.toString());
+      if (d == null) continue;
+      final q = _findQuestion(questions, a['report_question_id']);
+      final kind = FarmDateRules.kindOf(q, isNewBornReport: isNewBorn);
+      final error =
+          FarmDateRules.validate(kind, d, dates, matingDate: mating);
+      if (error != null) {
+        final title = q == null
+            ? ''
+            : '${isArabic ? (q.questionTextAr ?? q.questionText) : q.questionText}: ';
+        return '$title$error';
+      }
+    }
+    return null;
+  }
+
+  ReportQuestion? _findQuestion(List<ReportQuestion> list, dynamic id) {
+    for (final q in list) {
+      if (q.id == id) return q;
+      for (final c in q.contents ?? const <ReportQuestionContent>[]) {
+        final f = c.followUpQuestion;
+        if (f == null) continue;
+        final found = _findQuestion([f], id);
+        if (found != null) return found;
+      }
+    }
+    return null;
+  }
+
+  /// Questions depend on the animal (its type's options, female-only
+  /// reports...): reload them for the selected animal and drop old answers.
+  void _onAnimalChanged(String? animalKey) {
+    if (widget.isAnimalRequired != 1) return;
+    if (ref.read(getLivestockProvider).isLoading) return;
+    if (isNewBorn) {
+      // Newborn report: the animal picked here is the mother.
+      _loadMotherDates(animalKey);
+    } else {
+      _loadAnimalDates(animalKey);
+    }
+    final questions = ref.read(reportCategoryQuestionsProvider.notifier);
+    if (animalKey == questions.loadedForAnimalKey) return;
+    setState(() {
+      answersList = [];
+      qustionIds = {};
+      requiredQustionIds = {};
+    });
+    questions.getQuestions(widget.id, animalKey: animalKey);
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(
+      getLivestockProvider.select((a) => a.valueOrNull?.selectedAnimalKey),
+      (_, next) => _onAnimalChanged(next),
+    );
     final reportCategoryQuestions = ref.watch(reportCategoryQuestionsProvider);
     final barnAsync = ref.watch(barnAsyncProvider);
     final user = context.read<AuthCubit>().currentUser;
@@ -210,7 +376,10 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
               ),
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.centerFloat,
-              floatingActionButton: showButton
+              // Hidden while the keyboard is open, so it never covers the
+              // field being typed in.
+              floatingActionButton: showButton &&
+                      MediaQuery.viewInsetsOf(context).bottom == 0
                   ? (widget.isAnimalRequired == 1 &&
                           (livestockAsync.asData?.value?.animals?.isEmpty ??
                               true))
@@ -248,6 +417,40 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
               body: reportCategoryQuestions.when(
                 data: (data) {
                   if (data == null) return const SizedBox();
+                  // The report doesn't apply to this animal (e.g. productive
+                  // status for a male): show why, hide the form and Save.
+                  final unavailableReason = ref
+                      .read(reportCategoryQuestionsProvider.notifier)
+                      .unavailableReason;
+                  if (unavailableReason != null) {
+                    showButton = false;
+                    return Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          if (widget.isAnimalRequired == 1)
+                            Expanded(
+                              child: AnimalRefWidget(
+                                needCategories: isVaccination,
+                                selectedAnimalCtegory: selectedAnimalCategory,
+                                onSelectCtegory: (category) => setState(
+                                    () => selectedAnimalCategory = category),
+                              ),
+                            ),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(.08),
+                              border: Border.all(color: Colors.orange),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: CustomText(text: unavailableReason),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                   if (data.isEmpty &&
                       (!isVaccination && !isDeath && !isLivestock)) {
                     showButton = false;
@@ -342,7 +545,8 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
                         }
                         if (isVaccination &&
                             index == (widget.isAnimalRequired == 1 ? 1 : 0)) {
-                          return TypeOfVaccination(key: vaccinationKey);
+                          return TypeOfVaccination(
+                              key: vaccinationKey, animalDates: _formDates);
                         }
                         if (isDeath &&
                             index == (widget.isAnimalRequired == 1 ? 1 : 0)) {
@@ -392,6 +596,7 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
                                           padding: const EdgeInsets.only(
                                               bottom: 24.0),
                                           child: ReportQuestionComponent(
+                                            animalDates: _formDates,
                                             isNewBornReport: isNewBorn,
                                             allAnswers: answersList,
                                             onAnswerTap: handleAnswerTap,
@@ -566,6 +771,19 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
       if (mounted) {
         if (errorMsg == 'no_admin_qs') return;
         if (errorMsg == null) {
+          final bulk =
+              ref.read(getVaccinationProvider.notifier).lastBulkResult;
+          if (isVaccination && bulk != null && bulk.skipped > 0) {
+            CustomSnackBar.message(
+                context,
+                bulk.added != null
+                    ? 'vaccine_added_skipped'.tr(namedArgs: {
+                        'added': '${bulk.added}',
+                        'skipped': '${bulk.skipped}'
+                      })
+                    : 'vaccine_skipped'
+                        .tr(namedArgs: {'skipped': '${bulk.skipped}'}));
+          }
           ref.read(getVaccinationProvider.notifier).clearVaccineData();
           saveBottomSheet(context, isLivestock ? liveStocknumber : animalRef,
               isLivestock ? animalUniqueKey : animalkey);
@@ -584,6 +802,10 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
     if (answersList.isEmpty && isLivestock) {
       return "You didn't answer any questions.".tr();
     }
+
+    // Never send an illogical date to the API.
+    final dateError = _validateDates();
+    if (dateError != null) return dateError;
 
     if (isVaccination) {
       return await _saveVaccinationData();
@@ -604,7 +826,7 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
           vaccinationData ?? [], animalKey ?? selectedAnimalCategory,
           isCategory: animalKey == null, gender: gender);
     } else {
-      return 'Please enter vaccine detaissls';
+      return 'Please enter vaccine details';
     }
   }
 
@@ -681,6 +903,22 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
       }
     }
 
+    // A new date (e.g. birth) changes the other pickers' limits.
+    if (answers.any((a) => a['answer_type'] == 'date_answer')) {
+      Future.microtask(() {
+        if (mounted) setState(() {});
+      });
+    }
+
+    // The mother decides the logical birth dates.
+    final key = question.key?.toLowerCase();
+    if ((key == 'animal_mother' || key == 'animal_mother_new_born') &&
+        answers.isNotEmpty) {
+      final motherKey = answers.first['answer']?.toString();
+      // May run during build (auto-answer from the details page).
+      Future.microtask(() => _loadMotherDates(motherKey));
+    }
+
     // Collect IDs to remove: main question + any follow-up
     final idsToRemove = <int>{question.id!};
     idsToRemove.addAll(_collectFollowUps(question.id!));
@@ -725,6 +963,9 @@ class _ReportQuestionsPageState extends ConsumerState<ReportQuestionsPage> {
         kHeight10,
         CustomDatePicker(
           needFormat: false,
+          minimumDate: FarmDateRules.range(FarmDateKind.death, _formDates).min,
+          validateDate: (d) =>
+              FarmDateRules.validate(FarmDateKind.death, d, _formDates),
           onDateSelect: (date) {},
           controller: deathDateController,
         ),

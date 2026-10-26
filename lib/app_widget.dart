@@ -17,7 +17,11 @@ import 'package:ufc_mobile/main.dart';
 import 'package:ufc_mobile/screens/farm/application/barn_details/barn_details_cubit.dart';
 import 'package:ufc_mobile/screens/farm/application/dashbaord/dashboard_cubit.dart';
 import 'package:ufc_mobile/screens/farm/application/livestock_details/livestock_details_cubit.dart';
+import 'package:ufc_mobile/screens/farm/application/members/farm_account_cubit.dart';
 import 'package:ufc_mobile/screens/feed/application/address/address_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/distributor/distributor_cart_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/distributor/distributor_catalog_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/feed_channel/feed_channel_cubit.dart';
 import 'package:ufc_mobile/screens/feed/application/app_settings/app_setting_cubit.dart';
 import 'package:ufc_mobile/screens/feed/application/bottom_bar_bloc/bottom_bar_bloc.dart';
 import 'package:ufc_mobile/screens/feed/application/cart/cart_cubit.dart';
@@ -78,6 +82,14 @@ class App extends StatelessWidget {
             BlocProvider(create: (_) => FilterCubit()),
             BlocProvider(
               create: (_) => sl<ProductListCubit>()..getProducts(),
+            ),
+            BlocProvider(create: (_) => FeedChannelCubit()),
+            BlocProvider(create: (_) => sl<FarmAccountCubit>()),
+            BlocProvider(
+              create: (_) => sl<DistributorCartCubit>()..fetchCartCount(),
+            ),
+            BlocProvider(
+              create: (_) => sl<DistributorCatalogCubit>(),
             ),
             BlocProvider(
               create: (_) => sl<CartCubit>()..fetchCartCount(),
@@ -247,7 +259,18 @@ class App extends StatelessWidget {
                     }
                     return null;
                   },
-                  builder: EasyLoading.init(),
+                  builder: (context, child) {
+                    // Large system font sizes pushed screens past their
+                    // edges: allow some growth, but keep layouts intact.
+                    final media = MediaQuery.of(context);
+                    return MediaQuery(
+                      data: media.copyWith(
+                        textScaler: media.textScaler.clamp(
+                            minScaleFactor: 0.9, maxScaleFactor: 1.15),
+                      ),
+                      child: EasyLoading.init()(context, child),
+                    );
+                  },
                   home: Scaffold(
                     body: Center(
                       child:

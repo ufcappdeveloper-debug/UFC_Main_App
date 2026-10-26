@@ -14,6 +14,9 @@ import 'package:ufc_mobile/screens/pet_veterinary/components/extensions/pet_vete
 import '../../../application/authentication/auth_cubit.dart';
 import '../../../application/category/category_cubit.dart';
 import '../../../application/category/category_state.dart';
+import '../../../application/feed_channel/feed_channel_cubit.dart';
+import '../../../application/feed_channel/feed_channel_state.dart';
+import '../../distributor/pages/distributor_products_page.dart';
 import '../../../application/productList/product_list_cubit.dart';
 import '../../../application/productList/product_list_state.dart';
 import '../../../domain/entities/product/product_list_params.dart';
@@ -383,6 +386,17 @@ class _CategoryScreenState extends State<CategoryScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    // The Products tab follows the channel picked on Home.
+    return BlocBuilder<FeedChannelCubit, FeedChannelState>(
+      buildWhen: (p, c) => p.channel != c.channel,
+      builder: (context, channel) => channel.isDistributor
+          ? const DistributorProductsPage()
+          : _buildStationProducts(context),
+    );
+  }
+
+  Widget _buildStationProducts(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: MultiBlocListener(

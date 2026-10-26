@@ -217,7 +217,12 @@ class FeedCheckoutUtils {
     CheckoutModel checkoutDetails =
         await _purchaseProduct(data: data, directBuy: directBuy);
 
-    if (selectedPaymentOption == PaymentOptionsEnum.mada) {
+    // Nothing left to pay (e.g. a 100% coupon): the API returns the order
+    // already PAID, so skip the payment step and go straight to success.
+    final alreadyPaid =
+        checkoutDetails.checkoutSummary?.paymentStatus == 'PAID';
+
+    if (selectedPaymentOption == PaymentOptionsEnum.mada && !alreadyPaid) {
       await _handleMadaPayment(state, checkoutDetails: checkoutDetails);
     } else {
       _processOtherPaymentOptionsResponse(
@@ -289,6 +294,8 @@ class FeedCheckoutUtils {
       return;
     }
 
+    if (!state.mounted) return;
+    state.context.read<CartCubit>().clearCart();
     _navigateToSuccess(state, checkoutDetails);
   }
 

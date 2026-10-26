@@ -14,6 +14,8 @@ import '../../../../global/shared/widgets/loading/loading_dialog.dart';
 import '../../../../global/shared/widgets/show_confirmation_dailog.dart';
 import '../../application/get_question/get_question_cubit.dart';
 import '../../application/livestock_details/livestock_details_cubit.dart';
+import '../../application/animal_dates/animal_dates_loader.dart';
+import '../../domain/services/farm_date_rules.dart';
 
 class DeathPopup extends StatefulWidget {
   final int id;
@@ -37,6 +39,10 @@ class _DeathPopupState extends State<DeathPopup> {
 
   String? errorMsg;
   bool isLoading = false;
+
+  /// The animal's known dates (birth, records): a death can't come before.
+  AnimalDates? get _dates =>
+      AnimalDatesLoader.fromState(context.read<LiveStockDetailsCubit>().state);
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +84,11 @@ class _DeathPopupState extends State<DeathPopup> {
                           kHeight10,
                           CustomDatePicker(
                             needFormat: false,
+                            minimumDate:
+                                FarmDateRules.range(FarmDateKind.death, _dates)
+                                    .min,
+                            validateDate: (d) => FarmDateRules.validate(
+                                FarmDateKind.death, d, _dates),
                             onDateSelect: (date) {},
                             controller: dateController,
                           ),
@@ -109,25 +120,51 @@ class _DeathPopupState extends State<DeathPopup> {
                                   fill: true,
                                   title: 'Update'.tr(),
                                   onTap: () async {
+                                    if (dateController.text.isEmpty) {
+                                      setModalState(() => errorMsg =
+                                          'Please enter the date'.tr());
+                                      return;
+                                    }
+                                    final picked = FarmDateRules.parse(
+                                        dateController.text);
+                                    final dateError = picked == null
+                                        ? null
+                                        : FarmDateRules.validate(
+                                            FarmDateKind.death, picked, _dates);
+                                    if (dateError != null) {
+                                      setModalState(() => errorMsg = dateError);
+                                      return;
+                                    }
                                     final param = {
                                       "death_date": dateController.text,
                                       if (reasonController.text.isNotEmpty)
                                         "death_reason": reasonController.text
                                     };
+                                    final questionCubit =
+                                        context.read<GetQuestionCubit>();
+                                    final detailsCubit =
+                                        context.read<LiveStockDetailsCubit>();
                                     setModalState(() {
                                       errorMsg = null;
                                       isLoading = true;
                                     });
-                                    errorMsg = await context
-                                        .read<GetQuestionCubit>()
+                                    final error = await questionCubit
                                         .updateDeath(param, widget.id);
+                                    if (!context.mounted) return;
 
-                                    setModalState(() {
-                                      isLoading = false;
-                                    });
+                                    // Keep the sheet open on a validation
+                                    // error (e.g. death before the latest
+                                    // record) so the message is visible.
+                                    if (error != null) {
+                                      setModalState(() {
+                                        isLoading = false;
+                                        errorMsg = error;
+                                      });
+                                      return;
+                                    }
+                                    setModalState(() => isLoading = false);
                                     Navigator.pop(context);
-                                    await context
-                                        .read<LiveStockDetailsCubit>()
+                                    await detailsCubit
                                         .getLivestockDetails(widget.animalKey);
                                   },
                                 ),

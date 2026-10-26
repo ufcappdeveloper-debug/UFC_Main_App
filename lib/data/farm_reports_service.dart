@@ -2,23 +2,13 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 
-import '../global/config/config.dart';
 import '../global/shared/constants/constants.dart';
 import '../screens/farm/domain/entities/barn/livestock.dart';
 import '../screens/farm/domain/entities/report_category.dart';
-import '../global/util/dio/dio_intrepters.dart';
 
-class FarmDio {
-  static final Dio farmDio = Dio(
-    BaseOptions(
-      baseUrl: AppConfig.farmBaseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-    ),
-  )..interceptors.add(AppInterceptor());
+export '../global/config/farm_dio.dart';
+import '../global/config/farm_dio.dart';
 
-  static Dio get api => farmDio;
-}
 
 class FarmReportsService {
   Future<List<ReportCategory>> getReportCategories() async {
@@ -29,17 +19,29 @@ class FarmReportsService {
         .toList();
   }
 
-  Future<List<ReportQuestion>> getQuestions(int id) async {
+  /// With [animalKey] the API returns only that animal's options (no
+  /// "type - " prefixes), or an `unavailable_reason` when the report doesn't
+  /// apply to it (e.g. productive status for a male).
+  Future<({List<ReportQuestion> questions, String? unavailableReason})>
+      getQuestions(int id, {String? animalKey}) async {
     Response response = await FarmDio.api.get(
         "/api/ufc-farm/v1/user/report-categories/$id/questions",
         queryParameters: {
           "limit": 100,
           "is_active": 1,
           "is_follow_up": 0,
+          if (animalKey != null && animalKey.isNotEmpty)
+            "animal_unique_key": animalKey,
         });
-    return (response.data["data"] as List<dynamic>)
-        .map((data) => ReportQuestion.fromJson(data))
-        .toList();
+    final reason = response.data is Map
+        ? response.data["unavailable_reason"]?.toString()
+        : null;
+    return (
+      questions: ((response.data["data"] as List<dynamic>?) ?? [])
+          .map((data) => ReportQuestion.fromJson(data))
+          .toList(),
+      unavailableReason: (reason?.isEmpty ?? true) ? null : reason,
+    );
   }
 
   Future<ReportQuestionContent> addContents(
@@ -53,9 +55,15 @@ class FarmReportsService {
   }
 
   Future<ReportQuestion> getContents(
-      {required int categoryId, required int questionId}) async {
+      {required int categoryId,
+      required int questionId,
+      String? animalKey}) async {
     Response response = await FarmDio.api.get(
-        "/api/ufc-farm/v1/user/report-categories/$categoryId/questions/$questionId/contents");
+        "/api/ufc-farm/v1/user/report-categories/$categoryId/questions/$questionId/contents",
+        queryParameters: {
+          if (animalKey != null && animalKey.isNotEmpty)
+            "animal_unique_key": animalKey,
+        });
     return ReportQuestion.fromJson(response.data["data"]);
   }
 

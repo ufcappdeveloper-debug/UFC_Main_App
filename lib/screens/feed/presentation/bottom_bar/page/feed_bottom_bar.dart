@@ -14,6 +14,9 @@ import 'package:ufc_mobile/screens/pet_veterinary/components/extensions/pet_vete
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../../global/shared/widgets/show_confirmation_dailog.dart';
+import '../../../application/cart/cart_cubit.dart';
+import '../../../application/cart/cart_state.dart';
+import '../../../application/distributor/distributor_cart_cubit.dart';
 import '../../../application/navbar/app_bar_cubit.dart';
 import '../../category/pages/category_screen.dart';
 
@@ -234,6 +237,9 @@ class _FeedBottomBarState extends State<FeedBottomBar>
                                           ),
                                           title: name,
                                           isSelected: isSelected,
+                                          badgeCount: name == "Cart"
+                                              ? _cartBadge(context)
+                                              : 0,
                                           isFirst: index == 0,
                                           isLast: index ==
                                               FeedBottomBarUtils
@@ -255,6 +261,19 @@ class _FeedBottomBarState extends State<FeedBottomBar>
           },
         ));
   }
+}
+
+/// Shop cart + distributor cart, shown on the Cart tab.
+int _cartBadge(BuildContext context) {
+  final shop = context.select<CartCubit, int>((c) {
+    final s = c.state;
+    if (s is CartLoaded) return s.cartCount;
+    if (s is CartCountLoaded) return s.count;
+    return c.lastCount;
+  });
+  final distributor =
+      context.select<DistributorCartCubit, int>((c) => c.state.count);
+  return shop + distributor;
 }
 
 class FeedBackgroundCubit extends Cubit<String> {

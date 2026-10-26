@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_in_app_pip/picture_in_picture.dart';
 import 'package:ufc_mobile/global/config/config.dart';
+import 'package:ufc_mobile/global/config/farm_session.dart';
+import 'package:ufc_mobile/screens/farm/application/members/farm_account_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/feed_channel/feed_channel_cubit.dart';
 import 'package:ufc_mobile/global/shared/constants/custom_loading_dialog.dart';
 import 'package:ufc_mobile/global/util/call/agora_engine_singleton.dart';
 import 'package:ufc_mobile/global/util/common/common_utils.dart';
@@ -45,8 +48,11 @@ Future<void> performFullLogout({
     await preferences.setBool('init_fcm', false);
     await clearPreferencesExceptLanguage();
 
-    // Clear app-level token
+    // Clear app-level token and the selected farm / feed channel
     AppConfig.token = null;
+    await FarmSession.clear();
+    context.read<FarmAccountCubit>().reset();
+    context.read<FeedChannelCubit>().clear();
 
     // Reset app state cubits
     context.read<FeedBottomNavCubit>().changeTab(0);

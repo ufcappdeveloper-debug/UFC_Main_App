@@ -19,6 +19,8 @@ import 'package:ufc_mobile/global/util/farm/farm_dashboard_utils.dart';
 import 'package:ufc_mobile/global/util/farm/farm_utils.dart';
 import 'package:ufc_mobile/riverpod/farm/report_categories_async.dart';
 import 'package:ufc_mobile/screens/farm/application/livestock_details/livestock_details_cubit.dart';
+import 'package:ufc_mobile/screens/farm/application/animal_dates/animal_dates_loader.dart';
+import 'package:ufc_mobile/screens/farm/domain/services/camel_age.dart';
 import 'package:ufc_mobile/screens/farm/domain/entities/livestock/live_stock_details_model.dart';
 import 'package:ufc_mobile/screens/farm/domain/entities/livestock/livestock_reports_model.dart';
 import 'package:ufc_mobile/screens/farm/domain/entities/livestock/predefined_animal_list_model.dart';
@@ -637,6 +639,8 @@ class _LivestockDetailsPageState extends ConsumerState<LivestockDetailsPage> {
 
     // --- Age calculation ---
     String ageText = "0";
+    // Camels also get their traditional age name (Hawar, Mafrood, ...).
+    String? camelAgeName;
 
     if (isAge) {
       final birthDateStr = predefineKeys?.firstOrNull?.birthDate;
@@ -648,6 +652,11 @@ class _LivestockDetailsPageState extends ConsumerState<LivestockDetailsPage> {
           final duration = endDate.difference(birthDate);
           final years = duration.inDays ~/ 365;
           ageText = years.toString();
+          final type = predefineKeys?.firstOrNull;
+          if (CamelAge.isCamel(
+              '${type?.animalTypeNameEn ?? ''} ${type?.animalTypeNameAr ?? ''}')) {
+            camelAgeName = CamelAge.nameFor(birthDate, at: endDate);
+          }
         }
       }
     }
@@ -668,7 +677,7 @@ class _LivestockDetailsPageState extends ConsumerState<LivestockDetailsPage> {
           if (isAge)
             CustomText(
               text: ageText,
-              fontSize: 42,
+              fontSize: camelAgeName != null ? 32 : 42,
               textAlign: TextAlign.center,
               height: 1,
             )
@@ -694,6 +703,13 @@ class _LivestockDetailsPageState extends ConsumerState<LivestockDetailsPage> {
                     ? Colors.blue
                     : Colors.red,
           ),
+          if (isAge && camelAgeName != null)
+            CustomText(
+              text: camelAgeName,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.farmColor,
+            ),
         ],
       ),
     );
@@ -872,6 +888,12 @@ class _LivestockDetailsPageState extends ConsumerState<LivestockDetailsPage> {
                               children: [
                                 ReportQuestionComponent(
                                   fromDetailsPage: true,
+                                  // Edited dates follow the animal's
+                                  // birth, death and records.
+                                  animalDates: AnimalDatesLoader.fromState(
+                                      context
+                                          .read<LiveStockDetailsCubit>()
+                                          .state),
                                   question: state.question,
                                   onTap: (answers) {
                                     Map<String, dynamic> params = {

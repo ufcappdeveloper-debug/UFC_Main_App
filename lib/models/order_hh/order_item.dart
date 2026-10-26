@@ -16,6 +16,13 @@ class OrderItem {
   DateTime? updatedAt;
   ProductModel? product;
 
+  /// "SHOP" or "DISTRIBUTOR". Distributor lines have `product == null` and
+  /// carry `distributorProduct` instead.
+  String? itemType;
+  int? distributorProductId;
+  int? distributorVariantId;
+  ProductModel? distributorProduct;
+
   OrderItem({
     this.id,
     this.orderId,
@@ -30,7 +37,25 @@ class OrderItem {
     this.createdAt,
     this.updatedAt,
     this.product,
+    this.itemType,
+    this.distributorProductId,
+    this.distributorVariantId,
+    this.distributorProduct,
   });
+
+  bool get isDistributor => itemType == 'DISTRIBUTOR' ||
+      (product == null && distributorProduct != null);
+
+  /// Use this instead of [product] when rendering order lines.
+  ProductModel? get displayProduct => product ?? distributorProduct;
+
+  static ProductModel? _parseDistributorProduct(dynamic json) {
+    if (json is! Map<String, dynamic>) return null;
+    // Distributor categories/distributors are flat objects that don't match
+    // the shop shapes ProductModel expects.
+    return ProductModel.fromJson(
+        Map<String, dynamic>.from(json)..remove('category')..remove('distributor'));
+  }
 
   @override
   String toString() {
@@ -63,6 +88,10 @@ class OrderItem {
         product: json['product'] == null
             ? null
             : ProductModel.fromJson(json['product'] as Map<String, dynamic>),
+        itemType: json['item_type']?.toString(),
+        distributorProductId: json['distributor_product_id'] as int?,
+        distributorVariantId: json['distributor_variant_id'] as int?,
+        distributorProduct: _parseDistributorProduct(json['distributor_product']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -79,6 +108,9 @@ class OrderItem {
         'created_at': createdAt?.toIso8601String(),
         'updated_at': updatedAt?.toIso8601String(),
         'product': product?.toJson(),
+        'item_type': itemType,
+        'distributor_product_id': distributorProductId,
+        'distributor_variant_id': distributorVariantId,
       };
 
   @override

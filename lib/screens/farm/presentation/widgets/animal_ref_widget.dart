@@ -188,29 +188,28 @@ class _AnimalRefWidgetState extends ConsumerState<AnimalRefWidget> {
                               ? null
                               : data?.animalCategories?[index - 1].icon;
                           return GestureDetector(
-                            onTap: () {
-                              if (selected == contentKey) {
-                                setState(() {
-                                  selected = null;
-                                });
-                                widget.onSelectCtegory(null);
-                              } else {
-                                setState(() {
-                                  selected = contentKey;
-                                });
-                                widget.onSelectCtegory(contentKey);
-                              }
-                              ref
-                                  .read(getLivestockProvider.notifier)
-                                  .setAnimalRef(null, selectedAnimalKey: null);
-                            },
-                            child: CustomSelectBox(
-                            title: isArOrUr ? content ?? '' : content ?? '',
-                            isSelected: selected == contentKey,
-                            icon: icon,
-                                                        )
-                            
-                          );
+                              onTap: () {
+                                if (selected == contentKey) {
+                                  setState(() {
+                                    selected = null;
+                                  });
+                                  widget.onSelectCtegory(null);
+                                } else {
+                                  setState(() {
+                                    selected = contentKey;
+                                  });
+                                  widget.onSelectCtegory(contentKey);
+                                }
+                                ref
+                                    .read(getLivestockProvider.notifier)
+                                    .setAnimalRef(null,
+                                        selectedAnimalKey: null);
+                              },
+                              child: CustomSelectBox(
+                                title: isArOrUr ? content ?? '' : content ?? '',
+                                isSelected: selected == contentKey,
+                                icon: icon,
+                              ));
                         },
                       ),
                     ),

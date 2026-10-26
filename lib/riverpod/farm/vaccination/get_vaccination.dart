@@ -12,6 +12,10 @@ part "get_vaccination.g.dart";
 class GetVaccination extends _$GetVaccination {
   List<VaccineModel>? _vaccines;
 
+  /// Result of the last bulk add (by category/gender), for the
+  /// "Added to X animals, Y skipped" message.
+  ({int? added, int skipped})? lastBulkResult;
+
   @override
   FutureOr<List<VaccineModel>?> build() async {
     return null;
@@ -39,7 +43,8 @@ class GetVaccination extends _$GetVaccination {
           gender: gender?.toLowerCase(),
           isCategory: isCategory,
           vaccineSchedules: data);
-      await FarmVaccineService().addVaccine(param);
+      final result = await FarmVaccineService().addVaccine(param);
+      lastBulkResult = isCategory ? result : null;
       return null;
     } on DioException catch (e) {
       return extractErrorMessage(e.response?.data);

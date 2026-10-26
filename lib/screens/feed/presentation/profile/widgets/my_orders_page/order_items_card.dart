@@ -62,7 +62,7 @@ class OrderItemsCard extends StatelessWidget {
               tile = ListTile(
                 dense: true,
                 title: CustomText(
-                  text: ProductUtils.productName(item.product),
+                  text: ProductUtils.productName(item.displayProduct),
                   fontSize: isWide ? 15 : 13,
                   height: isWide ? 2 : 1.6,
                   overflow: TextOverflow.ellipsis,

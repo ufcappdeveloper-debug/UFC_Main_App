@@ -419,7 +419,8 @@ class _FeedCheckoutPageV2State extends State<FeedCheckoutPageV2> {
 
                           if (isDeliveryCoupon && !isDeliveryOrder) {
                             _resetCoupon(
-                                'This coupon is only valid for delivery orders.');
+                                'This coupon is only valid for delivery orders.'
+                                    .tr());
                             return;
                           }
 
@@ -455,6 +456,7 @@ class _FeedCheckoutPageV2State extends State<FeedCheckoutPageV2> {
                             _resetCoupon(
                               '${"Cart total must exceed".tr()} ${couponData?.minAmount} ${"to use this coupon.".tr()}',
                             );
+                            return;
                           }
 
 // DISCOUNT CALCULATION
@@ -1006,8 +1008,12 @@ class _FeedCheckoutPageV2State extends State<FeedCheckoutPageV2> {
                                     isDelivery: selectedDevliveryOption ==
                                         DeliveryOptionsEnum.delivery,
                                     addressId: addressId,
-                                    bookingTime:
-                                        formatUtcBookingTime(DateTime.now()),
+                                    // Send the delivery date the user picked.
+                                    bookingTime: selectedDevliveryOption ==
+                                                DeliveryOptionsEnum.delivery &&
+                                            formattedDate.isNotEmpty
+                                        ? formattedDate
+                                        : formatUtcBookingTime(DateTime.now()),
                                     walletAmount: walletAmount ?? 0,
                                     voucherCode: '',
                                     isWalletChecked: isWalletChecked,

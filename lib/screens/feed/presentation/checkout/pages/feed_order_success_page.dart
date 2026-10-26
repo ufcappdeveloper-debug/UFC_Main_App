@@ -179,8 +179,9 @@ class _FeedOrderSuccessPageState extends State<FeedOrderSuccessPage>
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.end,
-                                          children: state
-                                              .orders.first.orderItems!
+                                          children: (state.orders.first
+                                                      .orderItems ??
+                                                  [])
                                               .map((item) {
                                             return Padding(
                                               padding: const EdgeInsets.only(
@@ -202,7 +203,7 @@ class _FeedOrderSuccessPageState extends State<FeedOrderSuccessPage>
                                                               .arabic,
                                                       text: ProductUtils
                                                           .productName(
-                                                              item.product),
+                                                              item.displayProduct),
                                                       fontSize: 13,
                                                       maxLines: 2,
                                                       overflow:

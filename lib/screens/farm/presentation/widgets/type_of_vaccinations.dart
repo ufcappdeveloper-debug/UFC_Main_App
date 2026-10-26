@@ -13,9 +13,13 @@ import '../../../../global/shared/widgets/custom_widgets/custom_text.dart';
 import '../../../../riverpod/farm/vaccination/get_vaccination.dart';
 
 import 'farm_text_field.dart';
+import '../../domain/services/farm_date_rules.dart';
 
 class TypeOfVaccination extends ConsumerStatefulWidget {
-  const TypeOfVaccination({super.key});
+  /// The selected animal's dates (null for a whole category).
+  final AnimalDates? animalDates;
+
+  const TypeOfVaccination({super.key, this.animalDates});
 
   @override
   ConsumerState<TypeOfVaccination> createState() => TypeOfVaccinationState();
@@ -24,6 +28,9 @@ class TypeOfVaccination extends ConsumerStatefulWidget {
 class TypeOfVaccinationState extends ConsumerState<TypeOfVaccination> {
   late List<TextEditingController> dateControllers;
   late List<TextEditingController> durationControllers;
+
+  /// Vaccine name typed for the "Other" vaccine type, by row index.
+  final Map<int, TextEditingController> otherNameControllers = {};
   Set<int> editedDateIds = {};
   Set<int> editedDurationIds = {};
   bool initialized = false;
@@ -43,6 +50,9 @@ class TypeOfVaccinationState extends ConsumerState<TypeOfVaccination> {
     for (var c in durationControllers) {
       c.dispose();
     }
+    for (var c in otherNameControllers.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -50,6 +60,9 @@ class TypeOfVaccinationState extends ConsumerState<TypeOfVaccination> {
   Widget build(BuildContext context) {
     final vaccinTypes = ref.watch(getVaccinationProvider);
     return SingleChildScrollView(
+      // Room under the last rows so they can scroll above the keyboard and
+      // the Save button.
+      padding: const EdgeInsets.only(bottom: 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -99,53 +112,84 @@ class TypeOfVaccinationState extends ConsumerState<TypeOfVaccination> {
                       data?.length ?? 0,
                       (index) => Padding(
                         padding: const EdgeInsets.only(bottom: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                                width: 110,
-                                child: Text(
-                                  data?[index].vaccineName ?? '',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w400,
-                                    // fontFamily:
-                                    //     isArOrUr ? 'Graphik Arabic' : 'Kanit',
-                                    fontFamily: isEnglish
-                                        ? AppFontsFamily.english
-                                        : AppFontsFamily.arabic,
-                                    height: 1.4,
-                                  ),
-                                )),
-                            SizedBox(
-                              width: 120,
-                              child: CustomDatePicker(
-                                needFormat: false,
-                                hintText: 'Enter the date'.tr(),
-                                needIcon: false,
-                                onDateSelect: (date) {},
-                                controller: dateControllers[index],
-                              ),
-                            ),
-                            SizedBox(
-                                width: 85,
-                                child: CustomTextFormField(
-                                    inputFormatters: [
-                                      filteringtextinputformatter.digitsOnly,
-                                    ],
-                                    controller: durationControllers[index],
-                                    keyboardType: TextInputType.number,
-                                    suffixIcon: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          CustomText(
-                                            fontSize: 11,
-                                            text: 'day'.tr(),
-                                            textAlign: TextAlign.center,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                    width: 110,
+                                    // "Other": the user types the vaccine
+                                    // name in place of the label.
+                                    child: (data?[index].isOther ?? false)
+                                        ? CustomTextFormField(
+                                            context: context,
+                                            controller: otherNameControllers
+                                                .putIfAbsent(
+                                                    index,
+                                                    () =>
+                                                        TextEditingController()),
+                                            hintText: 'Other'.tr(),
                                           )
-                                        ]),
-                                    context: context)),
+                                        : Text(
+                                            data?[index].vaccineName ?? '',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w400,
+                                              // fontFamily:
+                                              //     isArOrUr ? 'Graphik Arabic' : 'Kanit',
+                                              fontFamily: isEnglish
+                                                  ? AppFontsFamily.english
+                                                  : AppFontsFamily.arabic,
+                                              height: 1.4,
+                                            ),
+                                          )),
+                                SizedBox(
+                                  width: 120,
+                                  child: CustomDatePicker(
+                                    needFormat: false,
+                                    minimumDate: FarmDateRules.range(
+                                            FarmDateKind.vaccination,
+                                            widget.animalDates)
+                                        .min,
+                                    maximumDate: FarmDateRules.range(
+                                            FarmDateKind.vaccination,
+                                            widget.animalDates)
+                                        .max,
+                                    validateDate: (d) => FarmDateRules.validate(
+                                        FarmDateKind.vaccination,
+                                        d,
+                                        widget.animalDates,
+                                        vaccineTypeId: data?[index].id),
+                                    hintText: 'Enter the date'.tr(),
+                                    needIcon: false,
+                                    onDateSelect: (date) {},
+                                    controller: dateControllers[index],
+                                  ),
+                                ),
+                                SizedBox(
+                                    width: 85,
+                                    child: CustomTextFormField(
+                                        inputFormatters: [
+                                          filteringtextinputformatter
+                                              .digitsOnly,
+                                        ],
+                                        controller: durationControllers[index],
+                                        keyboardType: TextInputType.number,
+                                        suffixIcon: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              CustomText(
+                                                fontSize: 11,
+                                                text: 'day'.tr(),
+                                                textAlign: TextAlign.center,
+                                              )
+                                            ]),
+                                        context: context)),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -189,6 +233,8 @@ class TypeOfVaccinationState extends ConsumerState<TypeOfVaccination> {
           vaccineTypeId: vaccinTypes?[i].id,
           vaccinationDate: dateControllers[i].text,
           prohibitionPeriod: int.tryParse(durationControllers[i].text),
+          isOther: vaccinTypes?[i].isOther ?? false,
+          otherName: otherNameControllers[i]?.text,
         ));
       }
     }

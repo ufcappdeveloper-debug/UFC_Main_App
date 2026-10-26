@@ -219,7 +219,6 @@ class FirebaseNotification {
             if (!context.mounted) return;
             final isFromNotification = true;
             debugPrint(' +++ Navigating to CallingScreen with values:');
-            debugPrint(' +++ token: ${response.token}');
             debugPrint(' +++ channelName: ${response.channelName}');
             debugPrint(' +++ uid: ${response.uId}');
             debugPrint(' +++ senderID: $senderId');

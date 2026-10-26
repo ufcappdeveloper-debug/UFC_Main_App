@@ -17,6 +17,8 @@ import 'package:ufc_mobile/screens/feed/domain/entities/favorite/favorite_query_
 import 'package:ufc_mobile/screens/feed/domain/entities/product/product_model.dart';
 import 'package:ufc_mobile/screens/feed/presentation/home/widgets/feed_filter_header.dart';
 import 'package:ufc_mobile/screens/feed/presentation/product/widgets/list_view/product_grid_view.dart';
+import 'package:ufc_mobile/screens/feed/presentation/distributor/widgets/cart_channel_switch.dart';
+import 'package:ufc_mobile/screens/feed/presentation/distributor/widgets/distributor_favorites_view.dart';
 
 class FeedFavoritePage extends StatefulWidget {
   const FeedFavoritePage({super.key});
@@ -28,6 +30,9 @@ class FeedFavoritePage extends StatefulWidget {
 class _FeedFavoritePageState extends State<FeedFavoritePage> {
   late TextEditingController searchController;
   List<ProductModel> prod = [];
+
+  /// 0 = Station favorites, 1 = Distributor favorites.
+  int _tab = 0;
   int? shopId;
 
   void callApi() {
@@ -88,7 +93,26 @@ class _FeedFavoritePageState extends State<FeedFavoritePage> {
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
             ),
-            body: BlocConsumer<AuthCubit, AuthState>(
+            body: Column(
+              children: [
+                CartChannelSwitch(
+                  selected: _tab,
+                  showCounts: false,
+                  onChanged: (i) => setState(() => _tab = i),
+                ),
+                Expanded(
+                  child: _tab == 1
+                      ? const DistributorFavoritesView()
+                      : _stationFavorites(fState, user),
+                ),
+              ],
+            ));
+      },
+    );
+  }
+
+  Widget _stationFavorites(FavoriteState fState, UserModel? user) {
+    return BlocConsumer<AuthCubit, AuthState>(
               listener: (context, state) {
                 if (state is ProfileLoadedSuccess) {
                   context.read<FavoriteCubit>().getFavProductList(
@@ -191,8 +215,6 @@ class _FeedFavoritePageState extends State<FeedFavoritePage> {
                   ],
                 );
               },
-            ));
-      },
-    );
+            );
   }
 }

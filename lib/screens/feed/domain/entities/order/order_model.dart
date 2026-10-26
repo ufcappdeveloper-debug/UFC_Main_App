@@ -7,6 +7,9 @@ import '../../../../../models/order_hh/go_pay.dart';
 import '../../../../../models/order_hh/order_delivery_status.dart';
 import '../../../../../models/order_hh/order_item.dart';
 import '../../../../../models/order_hh/shop.dart';
+import '../../../presentation/distributor/utils/distributor_style.dart';
+import '../distributor/bank_transfer_model.dart';
+import '../distributor/distributor_model.dart';
 
 class OrderModel {
   int? id;
@@ -55,6 +58,23 @@ class OrderModel {
   String? note;
   String? bookingDateTime;
 
+  /// "SHOP" or "DISTRIBUTOR" (older orders read back as "SHOP").
+  String? channel;
+  int? distributorId;
+  DistributorModel? distributor;
+  String? stationName;
+
+  /// Present while a BANK distributor order is unpaid; null once paid.
+  BankTransferModel? bankTransfer;
+
+  bool get isDistributor => channel == 'DISTRIBUTOR' || (shop == null && distributor != null);
+
+  String get vendorName {
+    if (shop != null) return localized(shop?.nameEn, shop?.nameAr);
+    if (distributor != null) return distributor!.name;
+    return stationName ?? '';
+  }
+
   OrderModel({
     this.id,
     this.shopId,
@@ -100,7 +120,12 @@ class OrderModel {
     this.car,
     this.shopRating,
     this.note,
-    this.bookingDateTime
+    this.bookingDateTime,
+    this.channel,
+    this.distributorId,
+    this.distributor,
+    this.stationName,
+    this.bankTransfer,
   });
 
   @override
@@ -175,6 +200,13 @@ class OrderModel {
         shopRating: json['shop_rating'] as dynamic,
         note: json['note'] as String?,
         bookingDateTime: json['booking_date_time'] as String?,
+        channel: json['channel']?.toString() ?? 'SHOP',
+        distributorId: json['distributor_id'] as int?,
+        distributor: json['distributor'] is Map<String, dynamic>
+            ? DistributorModel.fromJson(json['distributor'])
+            : null,
+        stationName: json['station_name']?.toString(),
+        bankTransfer: BankTransferModel.tryParse(json['bank_transfer']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -217,7 +249,11 @@ class OrderModel {
         'car': car,
         'shop_rating': shopRating,
         'note': note,
-        'booking_date_time': bookingDateTime
+        'booking_date_time': bookingDateTime,
+        'channel': channel,
+        'distributor_id': distributorId,
+        'station_name': stationName,
+        'bank_transfer': bankTransfer?.toJson(),
       };
 
   @override

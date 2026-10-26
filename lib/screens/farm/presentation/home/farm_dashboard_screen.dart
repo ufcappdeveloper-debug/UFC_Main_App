@@ -11,6 +11,7 @@ import 'package:ufc_mobile/screens/farm/application/dashbaord/dashboard_cubit.da
 import 'package:ufc_mobile/screens/farm/presentation/home/analytics_filter_container.dart';
 import 'package:ufc_mobile/screens/farm/presentation/widgets/build_cards.dart';
 import 'package:ufc_mobile/screens/farm/presentation/widgets/farm_shimmers.dart';
+import 'package:ufc_mobile/screens/farm/presentation/widgets/farm_switcher.dart';
 import 'package:ufc_mobile/screens/feed/application/navbar/app_bar_cubit.dart';
 
 class FarmDashboardScreen extends StatefulWidget {
@@ -58,6 +59,9 @@ class _FarmDashboardScreenState extends State<FarmDashboardScreen> {
       },
       child: Column(
         children: [
+          /// Active farm (farm members can work on an owner's farm)
+          const FarmSwitcher(),
+
           /// Filter Container
           BlocBuilder<FarmDashboardCubit, DashboardState>(
               builder: (context, state) {

@@ -11,15 +11,14 @@ class LivestockGrid extends StatelessWidget {
   final bool isFromDeath;
   final bool fromBarn;
   final String? category;
-  const LivestockGrid({
-    super.key,
-    this.bootomPadding,
-    required this.animals,
-    this.scrollPhysics,
-    this.isFromDeath = false,
-    this.fromBarn = false,
-    this.category
-  });
+  const LivestockGrid(
+      {super.key,
+      this.bootomPadding,
+      required this.animals,
+      this.scrollPhysics,
+      this.isFromDeath = false,
+      this.fromBarn = false,
+      this.category});
 
   @override
   Widget build(BuildContext context) {

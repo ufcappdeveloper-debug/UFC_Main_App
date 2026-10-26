@@ -1,0 +1,40 @@
+# Secrets: never commit signing keys or their passwords
+android/key.properties
+*.jks
+*.keystore
+*.p8
+
+# Flutter / Dart build output
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+.fvm/flutter_sdk
+
+# Android
+android/.gradle/
+android/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/App.framework
+
+# IDE
+.idea/
+*.iml
+_unused_files/
+
+# Flutter-generated per machine
+**/GeneratedPluginRegistrant.*
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/flutter_export_environment.sh
+macos/Flutter/ephemeral/
+android/gradlew
+android/gradlew.bat
+android/gradle/wrapper/gradle-wrapper.jar

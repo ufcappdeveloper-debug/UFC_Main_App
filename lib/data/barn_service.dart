@@ -1,20 +1,10 @@
 import 'package:dio/dio.dart';
 
-import '../global/config/config.dart';
-import '../global/util/dio/dio_intrepters.dart';
 import '../screens/farm/domain/entities/barn/barn_model.dart';
 
-class FarmDio {
-  static final Dio farmDio = Dio(
-    BaseOptions(
-      baseUrl: AppConfig.farmBaseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-    ),
-  )..interceptors.add(AppInterceptor());
+export '../global/config/farm_dio.dart';
+import '../global/config/farm_dio.dart';
 
-  static Dio get api => farmDio;
-}
 
 class BarnService {
   Future<List<BarnModel>> getBarns() async {

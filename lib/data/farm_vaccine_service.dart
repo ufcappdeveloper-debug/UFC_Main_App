@@ -14,9 +14,19 @@ class FarmVaccineService {
         .toList();
   }
 
-  Future<void> addVaccine(VaccineParam data) async {
+  /// Returns how many records were added and skipped. Animals not born yet,
+  /// already dead or already vaccinated that day are skipped by the API.
+  Future<({int? added, int skipped})> addVaccine(VaccineParam data) async {
     log('addVaccine data: ${data.toJson()}');
-    await FarmDio.api
+    final response = await FarmDio.api
         .post("/api/ufc-farm/v1/user/vaccine/animals/add", data: data.toJson());
+    final body = response.data is Map ? response.data['data'] : null;
+    int? toInt(dynamic v) => v is int ? v : int.tryParse('${v ?? ''}');
+    return (
+      added: body is Map
+          ? toInt(body['num_records_added'] ?? body['num_records'])
+          : null,
+      skipped: body is Map ? toInt(body['num_records_skipped']) ?? 0 : 0,
+    );
   }
 }

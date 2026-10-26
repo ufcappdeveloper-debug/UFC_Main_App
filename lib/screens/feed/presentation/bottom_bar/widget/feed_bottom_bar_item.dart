@@ -13,6 +13,7 @@ class FeedBottomBarItem extends BottomNavigationBarItem {
     required bool isSelected,
     bool isFirst = false,
     bool isLast = false,
+    int badgeCount = 0,
   }) : super(
           icon: FittedBox(
               fit: BoxFit.scaleDown,
@@ -44,10 +45,17 @@ class FeedBottomBarItem extends BottomNavigationBarItem {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         (iconPath ?? '').isNotEmpty
-                            ? Image.asset(
-                                iconPath!,
-                                height: 24,
-                                width: 24,
+                            ? Badge(
+                                isLabelVisible: badgeCount > 0,
+                                backgroundColor: const Color(0xFFF7D66D),
+                                textColor: Colors.black,
+                                label: Text(
+                                    badgeCount > 99 ? '99+' : '$badgeCount'),
+                                child: Image.asset(
+                                  iconPath!,
+                                  height: 24,
+                                  width: 24,
+                                ),
                               )
                             : SizedBox.shrink(),
                         if (isSelected) ...[

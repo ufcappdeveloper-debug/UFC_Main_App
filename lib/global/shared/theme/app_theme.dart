@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ufc_mobile/global/extensions/app_font_family.dart';
 import 'package:ufc_mobile/global/shared/constants/app_colors.dart';
 
 class AppTheme {
@@ -56,6 +57,9 @@ class AppTheme {
   static ThemeData mainThemeData(bool isDarkMode) {
     return ThemeData(
       useMaterial3: false,
+      // One font everywhere (Alexandria, as in the new design): text and
+      // inputs that don't set a font no longer fall back to Roboto.
+      fontFamily: AppFontsFamily.alexandria,
       primaryColor: primaryColor,
       scaffoldBackgroundColor: Colors.white,
 

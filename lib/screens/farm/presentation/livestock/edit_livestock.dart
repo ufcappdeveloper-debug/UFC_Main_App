@@ -11,6 +11,8 @@ import 'package:ufc_mobile/screens/farm/presentation/widgets/farm_appbar.dart';
 import '../../../../riverpod/farm/get_livestock_async.dart';
 import '../../application/get_question/get_question_cubit.dart';
 import '../../application/livestock_details/livestock_details_cubit.dart';
+import '../../application/animal_dates/animal_dates_loader.dart';
+import '../../domain/services/farm_date_rules.dart';
 import '../../domain/entities/livestock/live_stock_details_model.dart';
 import '../charts/weight_chart.dart';
 import '../widgets/report_question_component.dart';
@@ -25,6 +27,24 @@ class EditLivestock extends StatefulWidget {
 
 class _EditLivestockState extends State<EditLivestock> {
   List<Map<String, dynamic>> selectedAnswer = [];
+
+  /// The mother's dates: a birth date must fall within her life.
+  AnimalDates? _motherDates;
+  String? _motherKey;
+
+  /// The animal's dates plus its mother's, for the edited date's limits.
+  AnimalDates _animalDates() => (AnimalDatesLoader.fromState(
+              context.read<LiveStockDetailsCubit>().state) ??
+          AnimalDates.empty)
+      .withMother(_motherDates);
+
+  void _loadMother(String? key) {
+    if (key == null || key.isEmpty || key == _motherKey) return;
+    _motherKey = key;
+    AnimalDatesLoader.load(key).then((dates) {
+      if (mounted && _motherKey == key) setState(() => _motherDates = dates);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +75,7 @@ class _EditLivestockState extends State<EditLivestock> {
                 details?.predefinedAnimalDetails?.firstOrNull?.animalMother;
             final animalMotherQs =
                 details?.animalDetailsAsAnswer?.firstOrNull?.animalMother;
+            _loadMother(animalMother);
 
             return Padding(
               padding: const EdgeInsets.all(15),
@@ -241,6 +262,7 @@ class _EditLivestockState extends State<EditLivestock> {
                                           kHeight5,
                                   ReportQuestionComponent(
                                     fromDetailsPage: true,
+                                    animalDates: _animalDates(),
                                     question: state.question,
                                     onTap: (answers) {
                                       _selectAnswer(answers, details);

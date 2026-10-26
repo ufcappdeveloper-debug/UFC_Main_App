@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart' as loc;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ufc_mobile/screens/farm/domain/services/farm_date_rules.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart' as intl;
@@ -112,6 +113,9 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      // Keep the focused field well above the keyboard (and any button
+      // floating on it).
+      scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
       obscureText: _obscureText,
       maxLength: widget.maxLength,
       onTap: widget.onTap,
@@ -251,6 +255,19 @@ class CustomDatePicker extends StatefulWidget {
   final String? hintText;
   final bool needFormat;
 
+  /// Earliest selectable date, e.g. the animal's birth date.
+  final DateTime? minimumDate;
+
+  /// Latest selectable date. Defaults to today (Saudi time) because the API
+  /// rejects future farm dates; pass [allowFuture] for forecast questions
+  /// such as "Expected Calving Date".
+  final DateTime? maximumDate;
+  final bool allowFuture;
+
+  /// Logical check (see FarmDateRules). A non-null message refuses the date
+  /// and is shown under the field.
+  final String? Function(DateTime date)? validateDate;
+
   const CustomDatePicker({
     super.key,
     required this.onDateSelect,
@@ -258,7 +275,14 @@ class CustomDatePicker extends StatefulWidget {
     this.needIcon = true,
     this.hintText,
     this.needFormat = true,
+    this.minimumDate,
+    this.maximumDate,
+    this.allowFuture = false,
+    this.validateDate,
   });
+
+  /// "Today" as the farm API sees it (Saudi time, UTC+3).
+  static DateTime saudiToday() => FarmDateRules.today();
 
   @override
   State<CustomDatePicker> createState() => _CustomDatePickerState();
@@ -266,8 +290,31 @@ class CustomDatePicker extends StatefulWidget {
 
 class _CustomDatePickerState extends State<CustomDatePicker> {
   DateTime selectedDate = DateTime.now();
+  String? _error;
+
+  DateTime get _min => widget.minimumDate ?? DateTime(1900);
+
+  DateTime get _max {
+    DateTime max;
+    if (widget.maximumDate != null) {
+      max = DateTime(widget.maximumDate!.year, widget.maximumDate!.month,
+          widget.maximumDate!.day, 23, 59);
+    } else if (widget.allowFuture) {
+      max = DateTime(2100);
+    } else {
+      // End of today, so today itself stays selectable.
+      max = CustomDatePicker.saudiToday()
+          .add(const Duration(hours: 23, minutes: 59));
+    }
+    // Contradicting limits (bad data): keep the wheel usable; the
+    // validator still refuses the date.
+    return max.isBefore(_min) ? _min : max;
+  }
 
   void _showCupertinoDatePicker(BuildContext context) {
+    // Keep the wheel inside the allowed range.
+    if (selectedDate.isBefore(_min)) selectedDate = _min;
+    if (selectedDate.isAfter(_max)) selectedDate = _max;
     showModalBottomSheet(
       context: context,
       builder: (_) {
@@ -284,8 +331,8 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                     child: CupertinoDatePicker(
                       mode: CupertinoDatePickerMode.date,
                       initialDateTime: selectedDate,
-                      minimumDate: DateTime(1900),
-                      maximumDate: DateTime(2100),
+                      minimumDate: _min,
+                      maximumDate: _max,
                       onDateTimeChanged: (DateTime newDate) {
                         setState(() => selectedDate = newDate);
                       },
@@ -298,6 +345,9 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                   title: 'Done',
                   onTap: () {
                     Navigator.pop(context);
+                    final error = widget.validateDate?.call(selectedDate);
+                    setState(() => _error = error);
+                    if (error != null) return;
                     final formattedDate = intl.DateFormat(
                             widget.needFormat ? 'dd/MM/yyyy' : 'yyyy-MM-dd',
                             'en')
@@ -317,7 +367,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomTextFormField(
+    final field = CustomTextFormField(
       context: context,
       readOnly: true,
       controller: widget.controller,
@@ -329,6 +379,19 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
               child: SvgPicture.asset('assets/svg/farm/date.svg'),
             )
           : null,
+    );
+    if (_error == null) return field;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        field,
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(_error!,
+              style: const TextStyle(color: Colors.red, fontSize: 12)),
+        ),
+      ],
     );
   }
 }

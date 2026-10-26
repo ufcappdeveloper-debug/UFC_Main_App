@@ -1,3 +1,4 @@
+import 'package:ufc_mobile/global/util/log/log_utils.dart';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -45,12 +46,12 @@ class SentryTracker {
       'method': options?.method,
       'statusCode': statusCode ?? 'Unknown',
       'statusMessage': statusMessage ?? 'No status message',
-      'data': data ?? 'No data',
+      'data': data == null ? 'No data' : redactSecrets(data),
       'duration': duration ?? 'Unknown',
       'userAgent': userAgent ?? 'Unknown',
       'appVersion': packageInfo?.version ?? 'Unknown',
       'operatingSystem': operatingSystem,
-      'headers': options?.headers ?? 'Unknown',
+      'headers': options == null ? 'Unknown' : safeHeaders(options.headers),
       'queryParameters':
           options?.queryParameters.toString() ?? 'No query parameters',
       'requestSize': options?.data?.toString().length.toString() ?? 'Unknown',

@@ -20,6 +20,7 @@ import 'package:ufc_mobile/screens/feed/presentation/profile/pages/feed_order_de
 import 'package:ufc_mobile/screens/feed/presentation/profile/utils/feed_order_utils.dart';
 import 'package:ufc_mobile/screens/feed/presentation/profile/widgets/my_orders_page/status_step.dart';
 import 'package:ufc_mobile/screens/pet_veterinary/components/extensions/pet_veterinary_colors.dart';
+import 'package:ufc_mobile/screens/feed/presentation/distributor/widgets/distributor_common_widgets.dart';
 import 'package:ufc_mobile/screens/pet_veterinary_2/components/extensions/pet_veterinary_shadows.dart';
 
 class OrderCard extends StatelessWidget {
@@ -111,10 +112,22 @@ class OrderCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: CustomText(
-                      text: '${'Order Number'.tr()} #${order.id}',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: CustomText(
+                            text: '${'Order Number'.tr()} #${order.id}',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15,
+                          ),
+                        ),
+                        if (order.isDistributor) ...[
+                          const SizedBox(width: 6),
+                          const OutlineChip(
+                              label: 'Distributor',
+                              color: Color(0xFFE0A800)),
+                        ],
+                      ],
                     ),
                   ),
                   if (status == OrderStatusEnum.pending)
@@ -277,6 +290,6 @@ class OrderCard extends StatelessWidget {
 
   ProductModel? get product {
     if (order.orderItems == null || order.orderItems!.isEmpty) return null;
-    return order.orderItems!.first.product;
+    return order.orderItems!.first.displayProduct;
   }
 }

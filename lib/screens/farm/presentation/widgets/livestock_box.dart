@@ -11,6 +11,7 @@ import 'package:ufc_mobile/screens/farm/domain/entities/barn/animal_model.dart';
 import '../../../../global/shared/constants/constants.dart';
 import '../../../../global/shared/widgets/custom_widgets/custom_text.dart';
 import '../../../pet_veterinary/components/extensions/pet_veterinary_fontstyles.dart';
+import 'package:ufc_mobile/screens/farm/domain/services/camel_age.dart';
 import '../livestock/livestock_details_page.dart';
 
 class LiveStockBox extends StatelessWidget {
@@ -93,7 +94,8 @@ class LiveStockBox extends StatelessWidget {
                 ),
                 CustomText(
                   text: '#$animalref', //'#1234'
-                  textStyle: PetVeterinaryFontstyles.kanitRegular16,
+                  textStyle: PetVeterinaryFontstyles.kanitRegular16
+                      .copyWith(fontFamily: AppFontsFamily.alexandria),
                 )
               ],
             ),
@@ -106,7 +108,15 @@ class LiveStockBox extends StatelessWidget {
               ],
             ),
             if (!fromGrid) kHeight15,
-            textWidget(context, '$dob - $age ${'Years'.tr()}')
+            textWidget(context, () {
+              final text = '$dob - $age ${'Years'.tr()}';
+              // Camels: add the traditional age name (Hawar, Mafrood, ...).
+              final name = CamelAge.isCamel(animal?.animalType)
+                  ? CamelAge.nameFor(DateTime.tryParse(animal?.birthDate ?? ''),
+                      at: animal?.deathDate)
+                  : null;
+              return name == null ? text : '$text ($name)';
+            }())
           ],
         ),
       ),

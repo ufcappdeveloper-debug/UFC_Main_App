@@ -127,7 +127,7 @@ class _WeightChartState extends State<WeightChart> {
           children: [
             CustomText(
                 text: 'Weight',
-                textStyle: PetVeterinaryFontstyles.kanitRegular16),
+                textStyle: PetVeterinaryFontstyles.kanitRegular16.copyWith(fontFamily: AppFontsFamily.alexandria)),
             Row(
               children: [
                 CustomText(

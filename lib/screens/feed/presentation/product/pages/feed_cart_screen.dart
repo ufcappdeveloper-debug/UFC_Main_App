@@ -28,6 +28,10 @@ import '../../../../../global/shared/widgets/app_image_place_holder.dart';
 import '../../../../../global/shared/widgets/custom_widgets/custom_text.dart';
 import '../../../application/cart/cart_cubit.dart';
 import '../../../application/cart/cart_state.dart';
+import '../../../application/feed_channel/feed_channel_cubit.dart';
+import '../../../application/feed_channel/feed_channel_state.dart';
+import '../../distributor/widgets/cart_channel_switch.dart';
+import '../../distributor/widgets/distributor_cart_view.dart';
 
 class FeedCartScreen extends StatefulWidget {
   final bool isPush;
@@ -42,6 +46,10 @@ class FeedCartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<FeedCartScreen> {
   List<FeedCartItemModel> cartItems = [];
+
+  /// 0 = Station (shop) cart, 1 = Distributors cart.
+  late int _tab =
+      context.read<FeedChannelCubit>().state.isDistributor ? 1 : 0;
 
   void callApi() async {
     final cubit = context.read<CartCubit>();
@@ -59,6 +67,8 @@ class _CartScreenState extends State<FeedCartScreen> {
   }
 
   void _shopNowTapped(int index) {
+    context.read<FeedChannelCubit>().setChannel(
+        _tab == 1 ? FeedChannel.distributor : FeedChannel.station);
     context.read<FeedBottomNavCubit>().changeTab(1);
     context.read<AppBarHeightCubit>().setHeight(31);
     context.read<AppBarCubit>().setMode(AppBarMode.channel);
@@ -182,6 +192,30 @@ class _CartScreenState extends State<FeedCartScreen> {
     final isWide = ScreenWidthUtils.isWide(context);
     final isSmall = ScreenWidthUtils.isWide(context);
 
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: BlocListener<FeedChannelCubit, FeedChannelState>(
+        listenWhen: (p, c) => p.channel != c.channel,
+        listener: (context, channel) =>
+            setState(() => _tab = channel.isDistributor ? 1 : 0),
+        child: Column(
+          children: [
+            CartChannelSwitch(
+              selected: _tab,
+              onChanged: (i) => setState(() => _tab = i),
+            ),
+            Expanded(
+              child: _tab == 1
+                  ? DistributorCartView(onShopNow: () => _shopNowTapped(1))
+                  : _buildStationCart(context, isWide, isSmall),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStationCart(BuildContext context, bool isWide, bool isSmall) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: BlocBuilder<CartCubit, CartState>(

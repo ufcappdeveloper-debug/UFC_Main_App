@@ -1,3 +1,4 @@
+import 'package:ufc_mobile/global/config/farm_session.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:equatable/equatable.dart';
@@ -123,6 +124,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await logoutUsecase();
       currentUser = null;
+      await FarmSession.clear();
 
       emit(AuthInitial());
     } on Failure catch (f) {
@@ -137,6 +139,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await deleteAccountUsecase();
       currentUser = null;
+      await FarmSession.clear();
       emit(AuthInitial());
     } on Failure catch (f) {
       emit(AuthError(f.message));

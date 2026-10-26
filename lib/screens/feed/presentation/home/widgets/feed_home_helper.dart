@@ -22,12 +22,15 @@ import '../../../application/station/station_state.dart';
 import '../../../domain/entities/station/station_query_model.dart';
 
 class FeedHomeHelper {
-  void showStationBottomSheet(BuildContext context, {int? selectedStationId}) {
+  /// Completes when the sheet closes. The StationCubit is in
+  /// [StationSuccess] when a station was picked.
+  Future<void> showStationBottomSheet(BuildContext context,
+      {int? selectedStationId}) {
     final isWide = ScreenWidthUtils.isWide(context);
     final isWideLess = ScreenWidthUtils.isWideLess(context);
     final isWideMore = ScreenWidthUtils.isWideMore(context);
 
-    showModalBottomSheet(
+    return showModalBottomSheet(
       useRootNavigator: true,
       context: context,
       isScrollControlled: true,

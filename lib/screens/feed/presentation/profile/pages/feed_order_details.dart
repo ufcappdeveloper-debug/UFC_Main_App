@@ -34,6 +34,7 @@ import 'package:ufc_mobile/screens/feed/presentation/profile/widgets/my_orders_p
 import 'package:ufc_mobile/screens/feed/presentation/profile/widgets/my_orders_page/order_items_card.dart';
 import 'package:ufc_mobile/screens/feed/presentation/profile/widgets/my_orders_page/order_status_card.dart';
 import 'package:ufc_mobile/screens/pet_veterinary/components/extensions/pet_veterinary_colors.dart';
+import 'package:ufc_mobile/global/shared/widgets/bank_account_card.dart';
 import 'package:ufc_mobile/screens/pet_veterinary_2/components/extensions/pet_veterinary_shadows.dart';
 
 class FeedOrderDetails extends StatefulWidget {
@@ -216,6 +217,17 @@ class _FeedOrderDetailsState extends State<FeedOrderDetails> {
                       OrderItemsCard(
                         items: hasData ? order.orderItems : [],
                       ),
+                      // Unpaid BANK distributor order: keep the IBAN at hand.
+                      if (order.bankTransfer != null &&
+                          order.paymentStatus != 'PAID')
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 8),
+                          child: BankTransferBox(
+                            transfer: order.bankTransfer!,
+                            title: 'Payment pending: bank transfer',
+                          ),
+                        ),
                       OrderInfoCard(order: order),
                       SizedBox(height: 5),
                       if (!isStringEmpty(order.note))

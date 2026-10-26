@@ -34,7 +34,7 @@ class OrderDetailsCard extends StatelessWidget {
           DetailTile(
             isAmount: false,
             title: 'Number of Items',
-            amount: order.orderItems!.isEmpty
+            amount: (order.orderItems ?? []).isEmpty
                 ? "0"
                 : order.orderItems!.length > 9
                     ? '${order.orderItems!.length}'

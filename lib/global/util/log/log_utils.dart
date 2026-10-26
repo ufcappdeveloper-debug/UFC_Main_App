@@ -2,13 +2,35 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:ufc_mobile/global/config/config.dart';
 import 'package:ufc_mobile/global/util/analytic/sentry_tracker.dart';
 
 /// Logs messages to the console in debug mode with an optional logging level.
 void debugLog(String message) {
   if (kDebugMode) log(message);
 }
+
+final _secretValue = RegExp(
+  r'''(["']?(?:token|access_token|refresh_token|password|otp|integrity)["']?\s*[:=]\s*["']?)([^"',}\s]+)''',
+  caseSensitive: false,
+);
+
+/// Hides tokens, passwords and OTPs in text that is logged or sent to
+/// crash reporting (request/response bodies).
+String redactSecrets(Object? value) {
+  final text = value?.toString() ?? '';
+  return text
+      .replaceAllMapped(_secretValue, (m) => '${m[1]}[REDACTED]')
+      .replaceAll(RegExp(r'Bearer\s+\S+'), 'Bearer [REDACTED]');
+}
+
+/// Request headers without credentials.
+Map<String, dynamic> safeHeaders(Map<String, dynamic>? headers) => {
+      for (final e in (headers ?? const <String, dynamic>{}).entries)
+        e.key: e.key.toLowerCase() == 'authorization' ||
+                e.key.toLowerCase() == 'x-owner-id'
+            ? '[REDACTED]'
+            : e.value,
+    };
 
 class AppErrorLogger {
   AppErrorLogger._();
@@ -40,7 +62,7 @@ class AppErrorLogger {
       debugLog('Response:');
       debugLog('Status Code: ${response.statusCode ?? 'N/A'}');
       debugLog('Status Message: ${response.statusMessage ?? 'N/A'}');
-      debugLog('Response Data: ${response.data ?? 'N/A'}');
+      debugLog('Response Data: ${redactSecrets(response.data ?? 'N/A')}');
     } else {
       debugLog('Response: No response available');
     }
@@ -49,12 +71,11 @@ class AppErrorLogger {
     debugLog('Request:');
     debugLog('Base URL: ${requestOptions.baseUrl}');
     debugLog('Path: ${requestOptions.path}');
-    debugLog('Token: ${AppConfig.token}');
     debugLog(
       'Query Parameters: ${requestOptions.queryParameters.isNotEmpty ? requestOptions.queryParameters : 'None'}',
     );
-    debugLog('Request Headers: ${requestOptions.headers}');
-    debugLog('Request Data: ${requestOptions.data ?? 'No data'}');
+    debugLog('Request Headers: ${safeHeaders(requestOptions.headers)}');
+    debugLog('Request Data: ${redactSecrets(requestOptions.data ?? 'No data')}');
 
     debugLog('-----------------End Dio Error-----------------');
     return;

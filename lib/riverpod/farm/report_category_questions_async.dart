@@ -17,10 +17,21 @@ class ReportCategoryQuestions extends _$ReportCategoryQuestions {
     return null;
   }
 
-  Future<void> getQuestions(int id) async {
+  /// Message from the API when the report doesn't apply to the selected
+  /// animal (the form and Save are hidden then).
+  String? unavailableReason;
+
+  /// The animal the current questions were loaded for.
+  String? loadedForAnimalKey;
+
+  Future<void> getQuestions(int id, {String? animalKey}) async {
     state = const AsyncValue.loading();
     try {
-      state = AsyncValue.data(await FarmReportsService().getQuestions(id));
+      final result =
+          await FarmReportsService().getQuestions(id, animalKey: animalKey);
+      unavailableReason = result.unavailableReason;
+      loadedForAnimalKey = animalKey;
+      state = AsyncValue.data(result.questions);
     } on DioException catch (e) {
       state = AsyncValue.error(e.dioMessage, StackTrace.current);
     } catch (e) {
@@ -43,7 +54,9 @@ class ReportCategoryQuestions extends _$ReportCategoryQuestions {
       await reportService.addContents(
           categoryId: reportId, questionId: questionId, text: txt);
       ReportQuestion updatedQuestion = await reportService.getContents(
-          categoryId: reportId, questionId: questionId);
+          categoryId: reportId,
+          questionId: questionId,
+          animalKey: loadedForAnimalKey);
       final currentState = state;
       if (currentState.value != null) {
         final questions = currentState.value!;
@@ -125,6 +138,8 @@ class ReportCategoryQuestions extends _$ReportCategoryQuestions {
   }
 
   void clearQuestions() {
+    unavailableReason = null;
+    loadedForAnimalKey = null;
     state = AsyncValue.data(null);
   }
 }
