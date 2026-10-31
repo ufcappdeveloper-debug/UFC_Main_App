@@ -1521,5 +1521,6 @@
   "receipt_too_large": "The file must be 5 MB or smaller",
   "receipt_open_failed": "Could not open the receipt. Please try again",
   "unexpected_error": "An unexpected error occurred. Please contact the admin for assistance",
-  "too_many_requests": "Too many attempts. Please wait a moment and try again"
+  "too_many_requests": "Too many attempts. Please wait a moment and try again",
+  "view_payment_details": "View payment and account details"
 }

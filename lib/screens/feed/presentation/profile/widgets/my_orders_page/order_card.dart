@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:ufc_mobile/global/extensions/app_png_images.dart';
 import 'package:ufc_mobile/global/shared/constants/app_colors.dart';
 import 'package:ufc_mobile/global/shared/constants/constants.dart';
+import 'package:ufc_mobile/global/shared/widgets/bank_account_card.dart';
 import 'package:ufc_mobile/global/shared/widgets/custom_widgets/custom_snack_bar.dart';
 import 'package:ufc_mobile/global/shared/widgets/custom_widgets/custom_text.dart';
 import 'package:ufc_mobile/global/util/product/product_util.dart';
@@ -297,6 +298,32 @@ class OrderCard extends StatelessWidget {
                     ),
                   );
                 }).toList(),
+              ),
+            // Unpaid BANK order: the account details stay reachable after
+            // the success page is closed.
+            if (order.bankTransfer != null && order.canUploadBankReceipt)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: primaryColor,
+                      side: BorderSide(color: primaryColor),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(9)),
+                    ),
+                    onPressed: () =>
+                        showBankTransferSheet(context, order.bankTransfer!),
+                    icon: const Icon(Icons.account_balance_outlined, size: 18),
+                    label: CustomText(
+                      text: 'view_payment_details',
+                      fontSize: 13,
+                      color: primaryColor,
+                    ),
+                  ),
+                ),
               ),
             const SizedBox(height: 10),
           ],

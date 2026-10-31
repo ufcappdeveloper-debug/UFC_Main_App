@@ -16,6 +16,7 @@ import '../../../application/distributor/distributor_product_details_cubit.dart'
 import '../../../domain/entities/distributor/distributor_cart_model.dart';
 import '../../../domain/entities/distributor/distributor_model.dart';
 import '../../../domain/entities/distributor/distributor_product_model.dart';
+import '../../product/widgets/quantity_selector.dart';
 import '../utils/distributor_style.dart';
 import '../widgets/distributor_cart_listener.dart';
 import '../widgets/distributor_common_widgets.dart';
@@ -24,6 +25,7 @@ import '../../../application/distributor/distributor_checkout_cubit.dart';
 import 'package:ufc_mobile/global/extensions/app_font_family.dart';
 import 'package:ufc_mobile/global/shared/constants/app_colors.dart';
 import 'package:ufc_mobile/global/shared/widgets/custom_button.dart';
+import 'package:ufc_mobile/global/util/common/screen_width_utils.dart';
 
 /// Distributor product page (design: "Feed - Product Details", without the
 /// bag-size picker: distributor products have a single variant).
@@ -263,6 +265,24 @@ class _DetailsViewState extends State<_DetailsView> {
               : DistributorStyle.green,
         ),
         const _Divider(),
+        if (!product.isOutOfStock) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text('Select number of bags'.tr(),
+                style:
+                    DistributorStyle.style(size: 17, weight: FontWeight.w500)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: QuantitySelector(
+              isWide: ScreenWidthUtils.isWide(context),
+              stock: product.stock,
+              initialQuantity: _qty,
+              onSelected: (qty) => setState(() => _qty = qty),
+            ),
+          ),
+          const _Divider(),
+        ],
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text('Description'.tr(),

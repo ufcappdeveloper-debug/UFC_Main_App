@@ -1614,7 +1614,8 @@ class CodegenLoader extends AssetLoader{
   "receipt_too_large": "يجب ألا يتجاوز حجم الملف 5 ميجابايت",
   "receipt_open_failed": "تعذر فتح الإيصال. يرجى المحاولة مرة أخرى",
   "unexpected_error": "حدث خطأ غير متوقع. يرجى التواصل مع الدعم للمساعدة",
-  "too_many_requests": "محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى"
+  "too_many_requests": "محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى",
+  "view_payment_details": "عرض بيانات الدفع والحساب"
 };
 static const Map<String,dynamic> _en = {
   "Name": "Name",
@@ -3139,7 +3140,8 @@ static const Map<String,dynamic> _en = {
   "receipt_too_large": "The file must be 5 MB or smaller",
   "receipt_open_failed": "Could not open the receipt. Please try again",
   "unexpected_error": "An unexpected error occurred. Please contact the admin for assistance",
-  "too_many_requests": "Too many attempts. Please wait a moment and try again"
+  "too_many_requests": "Too many attempts. Please wait a moment and try again",
+  "view_payment_details": "View payment and account details"
 };
 static const Map<String,dynamic> _ur = {
   "Name": "نام",
@@ -4544,7 +4546,8 @@ static const Map<String,dynamic> _ur = {
   "receipt_too_large": "فائل کا سائز 5 MB سے زیادہ نہیں ہونا چاہیے",
   "receipt_open_failed": "رسید نہیں کھل سکی۔ براہ کرم دوبارہ کوشش کریں",
   "unexpected_error": "ایک غیر متوقع خرابی پیش آگئی۔ براہ کرم مدد کے لیے ایڈمن سے رابطہ کریں",
-  "too_many_requests": "بہت زیادہ کوششیں۔ براہ کرم کچھ دیر انتظار کر کے دوبارہ کوشش کریں"
+  "too_many_requests": "بہت زیادہ کوششیں۔ براہ کرم کچھ دیر انتظار کر کے دوبارہ کوشش کریں",
+  "view_payment_details": "ادائیگی اور اکاؤنٹ کی تفصیلات دیکھیں"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"ar": _ar, "en": _en, "ur": _ur};
 }

@@ -70,6 +70,42 @@ class BankAccountCard extends StatelessWidget {
 
 /// Bank transfer instructions: amount, reference (order number) and the
 /// distributor's accounts. Used on checkout success and order details.
+/// The amount, reference and accounts of an unpaid order, in a sheet.
+void showBankTransferSheet(BuildContext context, BankTransferModel transfer) {
+  showModalBottomSheet(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) => SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(ctx).size.height * 0.85,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+              BankTransferBox(
+                transfer: transfer,
+                title: 'Payment pending: bank transfer',
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 class BankTransferBox extends StatelessWidget {
   final BankTransferModel transfer;
   final String? title;

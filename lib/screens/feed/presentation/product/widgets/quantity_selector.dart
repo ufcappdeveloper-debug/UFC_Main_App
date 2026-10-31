@@ -5,6 +5,7 @@ import 'package:ufc_mobile/global/extensions/app_font_family.dart';
 import 'package:ufc_mobile/global/shared/constants/constants.dart';
 import 'package:ufc_mobile/global/shared/widgets/custom_button.dart';
 import 'package:ufc_mobile/global/shared/widgets/custom_widgets/custom_text.dart';
+import 'package:ufc_mobile/screens/farm/presentation/widgets/arabic_number.dart';
 import 'package:ufc_mobile/screens/farm/presentation/widgets/farm_text_field.dart';
 import 'package:ufc_mobile/screens/pet_veterinary/components/extensions/pet_veterinary_colors.dart';
 
@@ -56,10 +57,17 @@ class _QuantitySelectorState extends State<QuantitySelector> {
   String getCustomizeText() => isEnglish ? 'Customize' : 'تخصيص';
   String getEnterBagCountText() =>
       isEnglish ? 'Enter bag count' : 'أدخل عدد الأكياس';
-  String getValueMustBeLessThanText(int stock) => isEnglish
-      ? 'Value must be less than $stock'
-      : 'القيمة يجب أن تكون أقل من $stock';
   String getSelectText() => isEnglish ? 'Select' : 'اختيار';
+
+  /// Follows the parent when it changes the quantity (+/- buttons).
+  @override
+  void didUpdateWidget(QuantitySelector old) {
+    super.didUpdateWidget(old);
+    if (widget.initialQuantity != null &&
+        widget.initialQuantity != old.initialQuantity) {
+      selectedQty = widget.initialQuantity;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,106 +154,122 @@ class _QuantitySelectorState extends State<QuantitySelector> {
   }
 
   void _showCustomInput(BuildContext context) {
-    final controller = TextEditingController();
-    bool isEnglish =
-        Localizations.localeOf(context).languageCode.toLowerCase() == "en";
+    showCustomQuantitySheet(
+      context,
+      stock: widget.stock,
+      onSaved: (value) {
+        setState(() {
+          selectedQty = value;
 
-    showModalBottomSheet(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Top row: Close button, Title, empty space for alignment
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                  CustomText(
-                    text: isEnglish ? 'Customize' : 'تخصيص',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: isEnglish
-                        ? AppFontsFamily.english
-                        : AppFontsFamily.arabic,
-                  ),
-                  const SizedBox(width: 48),
-                ],
-              ),
+          if (!qtyValues.contains(value)) {
+            qtyValues.add(value);
+            qtyValues.sort();
+          }
+        });
 
-              // Text input for number
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-                child: CustomTextFormField(
-                  hintText: isEnglish ? 'Enter bag count' : 'أدخل عدد الأكياس',
-                  controller: controller,
-                  keyboardType: TextInputType.number,
-                  textDirection:
-                      isEnglish ? TextDirection.ltr : TextDirection.rtl,
-                  context: context,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              CustomButton(
-                  height: 50,
-                  // fontFamily: isArOrUr ? 'Graphik Arabic' : 'Kanit',
-                  fontFamily: isEnglish
-                      ? AppFontsFamily.english
-                      : AppFontsFamily.arabic,
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  title: isEnglish ? 'Save' : 'حفظ',
-                  onTap: () {
-                    final value = int.tryParse(controller.text);
-                    if (value == null) {
-                      Fluttertoast.showToast(
-                          msg: 'Please enter number of bags'.tr());
-                      return;
-                    }
-                    if (value > 0 && value <= widget.stock) {
-                      setState(() {
-                        selectedQty = value;
-
-                        if (!qtyValues.contains(value)) {
-                          qtyValues.add(value);
-                          qtyValues.sort();
-                        }
-                      });
-
-                      widget.onSelected(value);
-                      Navigator.pop(ctx);
-                    } else {
-                      Fluttertoast.showToast(
-                        msg: isEnglish
-                            ? 'Value must be less than ${widget.stock}'
-                            : 'القيمة يجب أن تكون أقل من ${widget.stock}',
-                      );
-                    }
-                  }),
-
-              kHeight40
-            ],
-          ),
-        );
+        widget.onSelected(value);
       },
     );
   }
+}
+
+/// The "Customize" sheet: type a number of bags, up to [stock] when known.
+void showCustomQuantitySheet(
+  BuildContext context, {
+  int? stock,
+  int? initialQuantity,
+  required ValueChanged<int> onSaved,
+}) {
+  final controller = TextEditingController(text: initialQuantity?.toString());
+  bool isEnglish =
+      Localizations.localeOf(context).languageCode.toLowerCase() == "en";
+
+  showModalBottomSheet(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    builder: (ctx) {
+      return Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Top row: Close button, Title, empty space for alignment
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+                CustomText(
+                  text: isEnglish ? 'Customize' : 'تخصيص',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  fontFamily:
+                      isEnglish ? AppFontsFamily.english : AppFontsFamily.arabic,
+                ),
+                const SizedBox(width: 48),
+              ],
+            ),
+
+            // Text input for number
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+              child: CustomTextFormField(
+                hintText: isEnglish ? 'Enter bag count' : 'أدخل عدد الأكياس',
+                controller: controller,
+                keyboardType: TextInputType.number,
+                textDirection:
+                    isEnglish ? TextDirection.ltr : TextDirection.rtl,
+                context: context,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            CustomButton(
+                height: 50,
+                fontFamily:
+                    isEnglish ? AppFontsFamily.english : AppFontsFamily.arabic,
+                width: MediaQuery.of(context).size.width * 0.8,
+                title: isEnglish ? 'Save' : 'حفظ',
+                onTap: () {
+                  final value =
+                      int.tryParse(convertNumbersToEnglish(controller.text));
+                  if (value == null) {
+                    Fluttertoast.showToast(
+                        msg: 'Please enter number of bags'.tr());
+                    return;
+                  }
+                  if (value > 0 && (stock == null || value <= stock)) {
+                    onSaved(value);
+                    Navigator.pop(ctx);
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: stock == null
+                          ? 'Please enter number of bags'.tr()
+                          : (isEnglish
+                              ? 'Value must be between 1 and $stock'
+                              : 'القيمة يجب أن تكون بين 1 و $stock'),
+                    );
+                  }
+                }),
+
+            kHeight40
+          ],
+        ),
+      );
+    },
+  );
 }

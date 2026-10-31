@@ -10,6 +10,7 @@ import 'package:ufc_mobile/global/shared/widgets/app_image_place_holder.dart';
 import 'package:ufc_mobile/global/shared/widgets/custom_reload_provider.dart';
 import 'package:ufc_mobile/global/shared/widgets/show_confirmation_dailog.dart';
 import 'package:ufc_mobile/screens/feed/presentation/product/widgets/cart/empty_cart_widget.dart';
+import 'package:ufc_mobile/screens/feed/presentation/product/widgets/quantity_selector.dart';
 
 import '../../../application/distributor/distributor_cart_cubit.dart';
 import '../../../domain/entities/distributor/distributor_cart_model.dart';
@@ -199,6 +200,28 @@ class _CartLine extends StatelessWidget {
                           ? () => cubit.increment(item.id!)
                           : null,
                     ),
+                    if (item.id != null)
+                      GestureDetector(
+                        onTap: busy
+                            ? null
+                            : () => showCustomQuantitySheet(
+                                  context,
+                                  stock: stock,
+                                  initialQuantity: item.quantity,
+                                  onSaved: (qty) {
+                                    if (qty != item.quantity) {
+                                      cubit.setQuantity(item.id!, qty);
+                                    }
+                                  },
+                                ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 6),
+                          child: Text('Customize'.tr(),
+                              style: DistributorStyle.style(
+                                  size: 13, color: DistributorStyle.green)),
+                        ),
+                      ),
                     Flexible(child: RiyalAmount(item.total, size: 13)),
                   ],
                 ),
