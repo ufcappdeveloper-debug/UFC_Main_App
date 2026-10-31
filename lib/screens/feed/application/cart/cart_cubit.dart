@@ -1,5 +1,6 @@
 // application/cart/cart_cubit.dart
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ufc_mobile/global/shared/constants/constants.dart';
 import 'package:ufc_mobile/global/util/dio/dio_intrepters.dart';
@@ -46,11 +47,11 @@ class CartCubit extends Cubit<CartState> {
     emit(CartLoading());
 
     try {
-      // fetch latest cart first
-      await fetchCart();
-
-      // calculate existing qty
-      final existingQty = getExistingQuantityForVariant(params.variantId);
+      // latest quantity in the cart (a failure here stops the add)
+      final latest = await getCartUseCase();
+      final existingQty = (latest.cart ?? [])
+          .where((item) => item.variationId == params.variantId)
+          .fold<int>(0, (sum, item) => sum + (item.quantity ?? 0));
       final remainingStock = (availableStock ?? 0) - existingQty;
 
       if (remainingStock <= 0) {
@@ -76,8 +77,7 @@ class CartCubit extends Cubit<CartState> {
 
       // fetch updated cart
       final response = await getCartUseCase();
-      final count = await getCartCountUseCase();
-      lastCount = count;
+      final count = await _countOrLast();
 
       // emit CartLoaded directly with updated cart and count
       emit(CartAdded());
@@ -130,7 +130,7 @@ class CartCubit extends Cubit<CartState> {
 
       // fetch updated cart
       final response = await getCartUseCase();
-      final count = await getCartCountUseCase();
+      final count = await _countOrLast();
 
       emit(current.copyWith(
         cartItems: response.cart ?? [],
@@ -142,9 +142,11 @@ class CartCubit extends Cubit<CartState> {
       // Remove loading state on error
       emit(current.copyWith(updatingItemIds: {}));
       if (_isNotFound(e)) return fetchCart();
-      emit(CartError(e.toString()));
+      emit(CartError(_message(e)));
     }
   }
+
+  String _message(Object e) => e is DioException ? e.dioMessage : e.toString();
 
   /// The API returns 404 for a cart item that isn't the user's (any more).
   bool _isNotFound(Object e) =>
@@ -164,7 +166,7 @@ class CartCubit extends Cubit<CartState> {
 
       // fetch updated cart
       final response = await getCartUseCase();
-      final count = await getCartCountUseCase();
+      final count = await _countOrLast();
 
       if (state is CartLoaded) {
         emit((state as CartLoaded).copyWith(
@@ -182,7 +184,7 @@ class CartCubit extends Cubit<CartState> {
         ));
       }
       if (_isNotFound(e)) return fetchCart();
-      emit(CartError(e.toString()));
+      emit(CartError(_message(e)));
     }
   }
 
@@ -199,7 +201,13 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  Future<void> fetchCart() async {
+  Future<void>? _fetching;
+
+  /// Joins a fetch already in progress instead of sending a second one.
+  Future<void> fetchCart() =>
+      _fetching ??= _fetchCart().whenComplete(() => _fetching = null);
+
+  Future<void> _fetchCart() async {
     emit(CartLoading());
     try {
       final response = await getCartUseCase();
@@ -208,6 +216,7 @@ class CartCubit extends Cubit<CartState> {
       final loadedState = CartLoaded(
         response.cart ?? [],
         totalAmount: response.totalAmount ?? 0,
+        cartCount: lastCount,
       );
       emit(loadedState);
 
@@ -223,23 +232,27 @@ class CartCubit extends Cubit<CartState> {
   /// Last known shop cart count, available in any state (bottom-bar badge).
   int lastCount = 0;
 
-  Future<void> fetchCartCount() async {
+  /// The count, or the last known one if the request fails. The count only
+  /// feeds the badge, so its failure must never replace a loaded cart.
+  Future<int> _countOrLast() async {
     try {
-      final count = await getCartCountUseCase();
-      lastCount = count;
-
-      final currentState = state;
-      if (currentState is CartLoaded) {
-        // emit updated state with new cartCount
-        emit(currentState.copyWith(cartCount: count));
-      } else if (currentState is CartInitial ||
-          currentState is CartCountLoaded) {
-        emit(CartCountLoaded(count));
-      }
-    } on DioException catch (e) {
-      emit(CartError(e.dioMessage));
+      lastCount = await getCartCountUseCase();
     } catch (e) {
-      emit(CartError(e.toString()));
+      debugPrint('Cart count failed: $e');
+    }
+    return lastCount;
+  }
+
+  Future<void> fetchCartCount() async {
+    final count = await _countOrLast();
+
+    final currentState = state;
+    if (currentState is CartLoaded) {
+      // emit updated state with new cartCount
+      emit(currentState.copyWith(cartCount: count));
+    } else if (currentState is CartInitial ||
+        currentState is CartCountLoaded) {
+      emit(CartCountLoaded(count));
     }
   }
 
@@ -265,6 +278,7 @@ class CartCubit extends Cubit<CartState> {
       emit(CartLoaded(
         responseCart.cart ?? [],
         totalAmount: responseCart.totalAmount ?? 0,
+        cartCount: lastCount,
       ));
       await fetchCartCount();
     } on DioException catch (e) {

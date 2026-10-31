@@ -32,6 +32,7 @@ import 'package:ufc_mobile/screens/feed/presentation/profile/utils/feed_order_ut
 import 'package:ufc_mobile/screens/feed/presentation/profile/widgets/my_orders_page/order_details_info_card.dart';
 import 'package:ufc_mobile/screens/feed/presentation/profile/widgets/my_orders_page/order_info_card.dart';
 import 'package:ufc_mobile/screens/feed/presentation/profile/widgets/my_orders_page/order_items_card.dart';
+import 'package:ufc_mobile/screens/feed/presentation/distributor/widgets/bank_receipt_section.dart';
 import 'package:ufc_mobile/screens/feed/presentation/profile/widgets/my_orders_page/order_status_card.dart';
 import 'package:ufc_mobile/screens/pet_veterinary/components/extensions/pet_veterinary_colors.dart';
 import 'package:ufc_mobile/global/shared/widgets/bank_account_card.dart';
@@ -227,6 +228,19 @@ class _FeedOrderDetailsState extends State<FeedOrderDetails> {
                             transfer: order.bankTransfer!,
                             title: 'Payment pending: bank transfer',
                           ),
+                        ),
+                      if (order.id != null &&
+                          (order.canUploadBankReceipt ||
+                              (order.isBankDistributorOrder &&
+                                  order.hasBankReceipt)))
+                        BankReceiptSection(
+                          orderId: order.id!,
+                          receiptUrl: order.bankReceiptUrl,
+                          uploadedAt: order.bankReceiptUploadedAt,
+                          canUpload: order.canUploadBankReceipt,
+                          onChanged: () => context
+                              .read<MyOrdersCubit>()
+                              .getOrderDetails(order.id!),
                         ),
                       OrderInfoCard(order: order),
                       SizedBox(height: 5),

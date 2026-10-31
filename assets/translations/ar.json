@@ -1583,5 +1583,20 @@
   "Enter the vaccine name": "أدخل اسم التحصين",
   "Please enter the vaccine name for \"Other\"": "يرجى إدخال اسم التحصين للخيار \"أخرى\"",
   "Other": "أخرى",
-  "Camel age name": "اسم الإبل حسب العمر"
+  "Camel age name": "اسم الإبل حسب العمر",
+  "upload_receipt": "رفع إيصال التحويل",
+  "replace_receipt": "استبدال الإيصال",
+  "view_receipt": "عرض الإيصال",
+  "receipt_hint": "ارفع إيصال التحويل ليتمكن الموزع من تأكيد الدفع",
+  "awaiting_transfer": "بانتظار التحويل",
+  "receipt_under_review": "تم رفع الإيصال – قيد المراجعة",
+  "receipt_uploaded_toast": "تم رفع الإيصال بنجاح",
+  "later": "لاحقاً",
+  "receipt_camera": "الكاميرا",
+  "receipt_gallery": "معرض الصور",
+  "receipt_files": "الملفات (PDF)",
+  "receipt_too_large": "يجب ألا يتجاوز حجم الملف 5 ميجابايت",
+  "receipt_open_failed": "تعذر فتح الإيصال. يرجى المحاولة مرة أخرى",
+  "unexpected_error": "حدث خطأ غير متوقع. يرجى التواصل مع الدعم للمساعدة",
+  "too_many_requests": "محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى"
 }

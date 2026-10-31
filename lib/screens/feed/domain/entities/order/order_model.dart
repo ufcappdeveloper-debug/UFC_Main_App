@@ -67,7 +67,25 @@ class OrderModel {
   /// Present while a BANK distributor order is unpaid; null once paid.
   BankTransferModel? bankTransfer;
 
+  /// Temporary signed link (60 minutes): re-read it from the API, don't store.
+  String? bankReceiptUrl;
+
+  /// ISO 8601 on the orders list, `Y-m-d H:i` (UTC) on order details.
+  String? bankReceiptUploadedAt;
+
   bool get isDistributor => channel == 'DISTRIBUTOR' || (shop == null && distributor != null);
+
+  bool get isBankDistributorOrder =>
+      isDistributor && paymentMethod == 'BANK';
+
+  bool get isClosedOrder =>
+      orderStatus == 'CANCELLED' || orderStatus == 'REJECTED';
+
+  /// The customer can upload (or replace) the transfer receipt.
+  bool get canUploadBankReceipt =>
+      isBankDistributorOrder && paymentStatus == 'PENDING' && !isClosedOrder;
+
+  bool get hasBankReceipt => bankReceiptUrl?.isNotEmpty ?? false;
 
   String get vendorName {
     if (shop != null) return localized(shop?.nameEn, shop?.nameAr);
@@ -126,6 +144,8 @@ class OrderModel {
     this.distributor,
     this.stationName,
     this.bankTransfer,
+    this.bankReceiptUrl,
+    this.bankReceiptUploadedAt,
   });
 
   @override
@@ -207,6 +227,8 @@ class OrderModel {
             : null,
         stationName: json['station_name']?.toString(),
         bankTransfer: BankTransferModel.tryParse(json['bank_transfer']),
+        bankReceiptUrl: json['bank_receipt_url']?.toString(),
+        bankReceiptUploadedAt: json['bank_receipt_uploaded_at']?.toString(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -254,6 +276,8 @@ class OrderModel {
         'distributor_id': distributorId,
         'station_name': stationName,
         'bank_transfer': bankTransfer?.toJson(),
+        'bank_receipt_url': bankReceiptUrl,
+        'bank_receipt_uploaded_at': bankReceiptUploadedAt,
       };
 
   @override

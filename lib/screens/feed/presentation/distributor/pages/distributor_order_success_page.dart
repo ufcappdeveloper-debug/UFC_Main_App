@@ -16,14 +16,26 @@ import '../../../domain/entities/distributor/distributor_place_order_result.dart
 import '../../bottom_bar/page/feed_bottom_bar.dart';
 import '../../profile/pages/feed_order_details.dart';
 import '../utils/distributor_style.dart';
+import '../widgets/bank_receipt_section.dart';
 import '../widgets/distributor_common_widgets.dart';
 
 /// Shown after a distributor order is placed. Built from the place_order
 /// response; BANK orders get the bank transfer box with copy buttons.
-class DistributorOrderSuccessPage extends StatelessWidget {
+class DistributorOrderSuccessPage extends StatefulWidget {
   final DistributorPlaceOrderResult result;
 
   const DistributorOrderSuccessPage({super.key, required this.result});
+
+  @override
+  State<DistributorOrderSuccessPage> createState() =>
+      _DistributorOrderSuccessPageState();
+}
+
+class _DistributorOrderSuccessPageState
+    extends State<DistributorOrderSuccessPage> {
+  bool _receiptUploaded = false;
+
+  DistributorPlaceOrderResult get result => widget.result;
 
   void _home(BuildContext context) {
     Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
@@ -176,6 +188,15 @@ class DistributorOrderSuccessPage extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                 child: BankTransferBox(transfer: result.bankTransfer!),
               ),
+            // The order already exists: a failed upload can simply be retried
+            // here or later from My Orders, never by placing the order again.
+            if (result.bankTransfer != null && !paid && order?.id != null)
+              BankReceiptSection(
+                orderId: order!.id!,
+                receiptUrl: order.bankReceiptUrl,
+                uploadedAt: order.bankReceiptUploadedAt,
+                onChanged: () => setState(() => _receiptUploaded = true),
+              ),
             const SizedBox(height: 10),
             Center(
               child: SizedBox(
@@ -213,7 +234,13 @@ class DistributorOrderSuccessPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(9)),
                   ),
                   onPressed: () => _home(context),
-                  child: Text('Back to Home'.tr(),
+                  child: Text(
+                      (result.bankTransfer != null &&
+                                  !paid &&
+                                  !_receiptUploaded
+                              ? 'later'
+                              : 'Back to Home')
+                          .tr(),
                       style: DistributorStyle.style(
                           size: 15,
                           weight: FontWeight.w500,

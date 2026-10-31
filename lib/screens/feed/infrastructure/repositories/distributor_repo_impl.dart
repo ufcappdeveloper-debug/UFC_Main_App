@@ -1,3 +1,4 @@
+import '../../domain/entities/distributor/bank_transfer_model.dart';
 import '../../domain/entities/distributor/checkout_options_model.dart';
 import '../../domain/entities/distributor/checkout_summary_model.dart';
 import '../../domain/entities/distributor/distributor_cart_model.dart';
@@ -82,6 +83,15 @@ class DistributorRepositoryImpl implements DistributorRepository {
   Future<DistributorPlaceOrderResult> buyProduct(
           DistributorBuyProductParams params) =>
       remote.buyProduct(params);
+
+  @override
+  Future<BankReceiptModel> uploadBankReceipt(int orderId, String filePath,
+          {void Function(int sent, int total)? onProgress}) =>
+      remote.uploadBankReceipt(orderId, filePath, onProgress: onProgress);
+
+  @override
+  Future<String?> getBankReceiptUrl(int orderId) =>
+      remote.getBankReceiptUrl(orderId);
 
   @override
   Future<PlaceOrderAgainResult> placeOrderAgain(int orderId) =>

@@ -154,10 +154,27 @@ class OrderCard extends StatelessWidget {
                         color: redColor),
                 ],
               ),
-              subtitle: CustomText(
-                text: _orderDescription,
-                fontSize: 13,
-                color: PetVeterinaryColors.newPetDarkGray,
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: _orderDescription,
+                    fontSize: 13,
+                    color: PetVeterinaryColors.newPetDarkGray,
+                  ),
+                  if (order.isBankDistributorOrder && !order.isClosedOrder)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: order.paymentStatus == 'PAID'
+                          ? const OutlineChip(label: 'Paid')
+                          : OutlineChip(
+                              label: order.hasBankReceipt
+                                  ? 'receipt_under_review'
+                                  : 'awaiting_transfer',
+                              color: const Color(0xFFE0A800),
+                            ),
+                    ),
+                ],
               ),
               leading: status == OrderStatusEnum.pending
                   ? Container(

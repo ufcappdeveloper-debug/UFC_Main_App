@@ -1,3 +1,4 @@
+import '../../../domain/entities/distributor/bank_transfer_model.dart';
 import '../../../domain/entities/distributor/checkout_options_model.dart';
 import '../../../domain/entities/distributor/checkout_summary_model.dart';
 import '../../../domain/entities/distributor/distributor_cart_model.dart';
@@ -56,6 +57,13 @@ abstract class DistributorRemoteDataSource {
   /// "Order Now": buys one product without the cart.
   Future<DistributorPlaceOrderResult> buyProduct(
       DistributorBuyProductParams params);
+
+  /// Uploads (or replaces) the bank transfer receipt of an order.
+  Future<BankReceiptModel> uploadBankReceipt(int orderId, String filePath,
+      {void Function(int sent, int total)? onProgress});
+
+  /// A fresh receipt link: the previous one expires after 60 minutes.
+  Future<String?> getBankReceiptUrl(int orderId);
 
   // Favorites (A.9)
   Future<bool> toggleFavorite(int productId);

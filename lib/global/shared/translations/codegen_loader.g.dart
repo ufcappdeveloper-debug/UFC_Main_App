@@ -1599,7 +1599,22 @@ class CodegenLoader extends AssetLoader{
   "Enter the vaccine name": "أدخل اسم التحصين",
   "Please enter the vaccine name for \"Other\"": "يرجى إدخال اسم التحصين للخيار \"أخرى\"",
   "Other": "أخرى",
-  "Camel age name": "اسم الإبل حسب العمر"
+  "Camel age name": "اسم الإبل حسب العمر",
+  "upload_receipt": "رفع إيصال التحويل",
+  "replace_receipt": "استبدال الإيصال",
+  "view_receipt": "عرض الإيصال",
+  "receipt_hint": "ارفع إيصال التحويل ليتمكن الموزع من تأكيد الدفع",
+  "awaiting_transfer": "بانتظار التحويل",
+  "receipt_under_review": "تم رفع الإيصال – قيد المراجعة",
+  "receipt_uploaded_toast": "تم رفع الإيصال بنجاح",
+  "later": "لاحقاً",
+  "receipt_camera": "الكاميرا",
+  "receipt_gallery": "معرض الصور",
+  "receipt_files": "الملفات (PDF)",
+  "receipt_too_large": "يجب ألا يتجاوز حجم الملف 5 ميجابايت",
+  "receipt_open_failed": "تعذر فتح الإيصال. يرجى المحاولة مرة أخرى",
+  "unexpected_error": "حدث خطأ غير متوقع. يرجى التواصل مع الدعم للمساعدة",
+  "too_many_requests": "محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى"
 };
 static const Map<String,dynamic> _en = {
   "Name": "Name",
@@ -3109,7 +3124,22 @@ static const Map<String,dynamic> _en = {
   "Enter the vaccine name": "Enter the vaccine name",
   "Please enter the vaccine name for \"Other\"": "Please enter the vaccine name for \"Other\"",
   "Other": "Other",
-  "Camel age name": "Camel age name"
+  "Camel age name": "Camel age name",
+  "upload_receipt": "Upload receipt",
+  "replace_receipt": "Replace receipt",
+  "view_receipt": "View receipt",
+  "receipt_hint": "Upload the transfer receipt so the distributor can confirm your payment",
+  "awaiting_transfer": "Awaiting transfer",
+  "receipt_under_review": "Receipt uploaded – under review",
+  "receipt_uploaded_toast": "Receipt uploaded successfully",
+  "later": "Later",
+  "receipt_camera": "Camera",
+  "receipt_gallery": "Photo library",
+  "receipt_files": "Files (PDF)",
+  "receipt_too_large": "The file must be 5 MB or smaller",
+  "receipt_open_failed": "Could not open the receipt. Please try again",
+  "unexpected_error": "An unexpected error occurred. Please contact the admin for assistance",
+  "too_many_requests": "Too many attempts. Please wait a moment and try again"
 };
 static const Map<String,dynamic> _ur = {
   "Name": "نام",
@@ -4499,7 +4529,22 @@ static const Map<String,dynamic> _ur = {
   "Enter the vaccine name": "ویکسین کا نام درج کریں",
   "Please enter the vaccine name for \"Other\"": "براہ کرم \"دیگر\" کے لیے ویکسین کا نام درج کریں",
   "Other": "دیگر",
-  "Camel age name": "عمر کے لحاظ سے اونٹ کا نام"
+  "Camel age name": "عمر کے لحاظ سے اونٹ کا نام",
+  "upload_receipt": "رسید اپ لوڈ کریں",
+  "replace_receipt": "رسید تبدیل کریں",
+  "view_receipt": "رسید دیکھیں",
+  "receipt_hint": "ٹرانسفر کی رسید اپ لوڈ کریں تاکہ ڈسٹری بیوٹر آپ کی ادائیگی کی تصدیق کر سکے",
+  "awaiting_transfer": "ٹرانسفر کا انتظار ہے",
+  "receipt_under_review": "رسید اپ لوڈ ہو گئی – زیر جائزہ",
+  "receipt_uploaded_toast": "رسید کامیابی سے اپ لوڈ ہو گئی",
+  "later": "بعد میں",
+  "receipt_camera": "کیمرا",
+  "receipt_gallery": "فوٹو لائبریری",
+  "receipt_files": "فائلیں (PDF)",
+  "receipt_too_large": "فائل کا سائز 5 MB سے زیادہ نہیں ہونا چاہیے",
+  "receipt_open_failed": "رسید نہیں کھل سکی۔ براہ کرم دوبارہ کوشش کریں",
+  "unexpected_error": "ایک غیر متوقع خرابی پیش آگئی۔ براہ کرم مدد کے لیے ایڈمن سے رابطہ کریں",
+  "too_many_requests": "بہت زیادہ کوششیں۔ براہ کرم کچھ دیر انتظار کر کے دوبارہ کوشش کریں"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"ar": _ar, "en": _en, "ur": _ur};
 }

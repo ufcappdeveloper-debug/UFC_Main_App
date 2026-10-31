@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:ufc_mobile/global/util/common/common_utils.dart';
 import 'package:ufc_mobile/global/util/dio/dio_intrepters.dart';
 
+import '../../../domain/entities/distributor/bank_transfer_model.dart';
 import '../../../domain/entities/distributor/checkout_options_model.dart';
 import '../../../domain/entities/distributor/checkout_summary_model.dart';
 import '../../../domain/entities/distributor/distributor_cart_model.dart';
@@ -192,6 +193,44 @@ class DistributorRemoteDataSourceImpl implements DistributorRemoteDataSource {
         final response =
             await dio.post('$_base/buy_product', data: params.toJson());
         return DistributorPlaceOrderResult.fromJson(response.data);
+      });
+
+  @override
+  Future<BankReceiptModel> uploadBankReceipt(int orderId, String filePath,
+          {void Function(int sent, int total)? onProgress}) =>
+      _guard(() async {
+        try {
+          final response = await dio.post(
+            '$_base/orders/$orderId/bank_receipt',
+            data: FormData.fromMap(
+                {'receipt': await MultipartFile.fromFile(filePath)}),
+            onSendProgress: onProgress,
+          );
+          final data = response.data['data'];
+          return BankReceiptModel.fromJson(
+              data is Map<String, dynamic> ? data : const {});
+        } on DioException catch (e) {
+          // Wrong type, too large...: `errors.receipt[0]` says which.
+          final data = e.response?.data;
+          final errors = data is Map ? data['errors'] : null;
+          final receipt = errors is Map ? errors['receipt'] : null;
+          if (receipt is List && receipt.isNotEmpty) {
+            throw DistributorApiException(
+              statusCode: e.response?.statusCode,
+              message: receipt.first.toString(),
+            );
+          }
+          rethrow;
+        }
+      });
+
+  @override
+  Future<String?> getBankReceiptUrl(int orderId) => _guard(() async {
+        final response =
+            await dio.get('/api/ufc/v1/order_status_details/$orderId');
+        final data = response.data['data'];
+        final order = data is List && data.isNotEmpty ? data.first : data;
+        return order is Map ? parseString(order['bank_receipt_url']) : null;
       });
 
   @override

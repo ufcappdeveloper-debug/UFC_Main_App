@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:ufc_mobile/global/config/config.dart';
 import 'package:ufc_mobile/global/config/farm_session.dart';
@@ -21,6 +22,12 @@ class AppInterceptor extends Interceptor {
     final ownerId = FarmSession.ownerId;
     if (ownerId != null && FarmSession.appliesTo(options.path)) {
       options.headers['X-Owner-Id'] = ownerId.toString();
+    }
+
+    // Ask for JSON, otherwise errors such as 429 come back as HTML pages and
+    // lose their message. File downloads keep their own response type.
+    if (options.responseType == ResponseType.json) {
+      options.headers.putIfAbsent('Accept', () => 'application/json');
     }
 
     // Log request details to Sentry
@@ -66,8 +73,7 @@ class AppInterceptor extends Interceptor {
       final responseStatusCode = response.statusCode;
 
       // Handle different error statuses and throw appropriate exceptions
-      String errorMessage = err.error?.toString() ??
-          'An unexpected error occurred. Please contact the admin for assistance';
+      String errorMessage = err.error?.toString() ?? 'unexpected_error'.tr();
 
       if (responseStatusCode == null) throw errorMessage;
 
@@ -95,6 +101,8 @@ class AppInterceptor extends Interceptor {
           _throwCustomDioError(err, response, message ?? 'Unauthorized');
         case 403:
           _throwCustomDioError(err, response, message ?? 'Forbidden');
+        case 429:
+          _throwCustomDioError(err, response, 'too_many_requests'.tr());
         default:
           if (responseStatusCode >= 500) {
             debugLog('Request Data: ${err.requestOptions.data}');
@@ -140,7 +148,5 @@ void _throwCustomDioError(
 }
 
 extension DioMessage on DioException {
-  String get dioMessage =>
-      error?.toString() ??
-      "An unexpected error occurred. Please contact the admin for assistance";
+  String get dioMessage => error?.toString() ?? 'unexpected_error'.tr();
 }

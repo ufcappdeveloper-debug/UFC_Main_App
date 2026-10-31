@@ -9,7 +9,6 @@ import 'package:ufc_mobile/screens/feed/presentation/home/pages/feed_home.dart';
 import 'package:ufc_mobile/screens/feed/presentation/product/pages/feed_cart_screen.dart';
 import 'package:ufc_mobile/screens/feed/presentation/profile/pages/feed_profile_page.dart';
 
-import '../../../application/authentication/auth_cubit.dart';
 import '../../../application/cart/cart_cubit.dart';
 
 class FeedBottomBarUtils {
@@ -33,14 +32,8 @@ class FeedBottomBarUtils {
         return CategoryScreen(key: CategoryScreen.categoryKey);
 
       case "Cart":
-        final cartCubit = context.read<CartCubit>();
-        final authUser = context.read<AuthCubit>().currentUser;
-        if (authUser != null) {
-          cartCubit.fetchCart();
-        }
-
         return BlocProvider.value(
-          value: cartCubit,
+          value: context.read<CartCubit>(),
           child: GuestGuard(
               color: primaryColor,
               appType: AppType.feed,

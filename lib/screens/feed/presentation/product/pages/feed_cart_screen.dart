@@ -52,9 +52,7 @@ class _CartScreenState extends State<FeedCartScreen> {
       context.read<FeedChannelCubit>().state.isDistributor ? 1 : 0;
 
   void callApi() async {
-    final cubit = context.read<CartCubit>();
-    await cubit.fetchCart();
-    await cubit.fetchCartCount();
+    await context.read<CartCubit>().fetchCart();
   }
 
   @override
@@ -243,7 +241,6 @@ class _CartScreenState extends State<FeedCartScreen> {
                       ),
                       onPressed: () {
                         context.read<CartCubit>().fetchCart();
-                        context.read<CartCubit>().fetchCartCount();
                       },
                     ),
                   );
@@ -272,7 +269,6 @@ class _CartScreenState extends State<FeedCartScreen> {
                   child: RefreshIndicator(
                     onRefresh: () async {
                       await context.read<CartCubit>().fetchCart();
-                      await context.read<CartCubit>().fetchCartCount();
                     },
                     child: ListView.builder(
                       padding: const EdgeInsets.all(12),

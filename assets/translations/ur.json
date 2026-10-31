@@ -1386,5 +1386,20 @@
   "Enter the vaccine name": "ویکسین کا نام درج کریں",
   "Please enter the vaccine name for \"Other\"": "براہ کرم \"دیگر\" کے لیے ویکسین کا نام درج کریں",
   "Other": "دیگر",
-  "Camel age name": "عمر کے لحاظ سے اونٹ کا نام"
+  "Camel age name": "عمر کے لحاظ سے اونٹ کا نام",
+  "upload_receipt": "رسید اپ لوڈ کریں",
+  "replace_receipt": "رسید تبدیل کریں",
+  "view_receipt": "رسید دیکھیں",
+  "receipt_hint": "ٹرانسفر کی رسید اپ لوڈ کریں تاکہ ڈسٹری بیوٹر آپ کی ادائیگی کی تصدیق کر سکے",
+  "awaiting_transfer": "ٹرانسفر کا انتظار ہے",
+  "receipt_under_review": "رسید اپ لوڈ ہو گئی – زیر جائزہ",
+  "receipt_uploaded_toast": "رسید کامیابی سے اپ لوڈ ہو گئی",
+  "later": "بعد میں",
+  "receipt_camera": "کیمرا",
+  "receipt_gallery": "فوٹو لائبریری",
+  "receipt_files": "فائلیں (PDF)",
+  "receipt_too_large": "فائل کا سائز 5 MB سے زیادہ نہیں ہونا چاہیے",
+  "receipt_open_failed": "رسید نہیں کھل سکی۔ براہ کرم دوبارہ کوشش کریں",
+  "unexpected_error": "ایک غیر متوقع خرابی پیش آگئی۔ براہ کرم مدد کے لیے ایڈمن سے رابطہ کریں",
+  "too_many_requests": "بہت زیادہ کوششیں۔ براہ کرم کچھ دیر انتظار کر کے دوبارہ کوشش کریں"
 }
