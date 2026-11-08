@@ -53,7 +53,8 @@ class BankReceiptSection extends StatefulWidget {
   State<BankReceiptSection> createState() => _BankReceiptSectionState();
 }
 
-class _BankReceiptSectionState extends State<BankReceiptSection> {
+class _BankReceiptSectionState extends State<BankReceiptSection>
+    with AutomaticKeepAliveClientMixin<BankReceiptSection> {
   late String? _url = widget.receiptUrl;
   late String? _uploadedAt = widget.uploadedAt;
   late bool _canUpload = widget.canUpload;
@@ -64,6 +65,10 @@ class _BankReceiptSectionState extends State<BankReceiptSection> {
   DistributorRepository get _repo => sl<DistributorRepository>();
 
   bool get _hasReceipt => _url?.isNotEmpty ?? false;
+
+  // Preserve the upload result when a parent ListView scrolls this off screen.
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void didUpdateWidget(BankReceiptSection old) {
@@ -184,6 +189,7 @@ class _BankReceiptSectionState extends State<BankReceiptSection> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (!_canUpload && !_hasReceipt) return const SizedBox.shrink();
     final uploadedAt = BankReceiptSection.formatUploadedAt(_uploadedAt);
 
