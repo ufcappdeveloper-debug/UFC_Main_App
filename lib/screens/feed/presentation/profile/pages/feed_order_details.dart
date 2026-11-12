@@ -147,7 +147,7 @@ class _FeedOrderDetailsState extends State<FeedOrderDetails> {
                         CustomSnackBar.error(context, e.toString());
                       }
                     },
-                    title: "Receipt"),
+                    title: "Order Details"),
                 kHeight30,
               ],
             ),
