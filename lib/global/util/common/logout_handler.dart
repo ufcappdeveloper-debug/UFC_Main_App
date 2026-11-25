@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ufc_mobile/screens/feed/application/main_source/main_source_cart_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_in_app_pip/picture_in_picture.dart';
 import 'package:ufc_mobile/global/config/config.dart';
@@ -23,6 +24,7 @@ Future<void> performFullLogout({
   try {
     // Start logout
     final future = context.read<AuthCubit>().logout();
+    final mainSourceCart = context.read<MainSourceCartCubit>();
 
     // Dispose Agora engine
     AgoraEngineSingleton().dispose();
@@ -53,6 +55,7 @@ Future<void> performFullLogout({
     await FarmSession.clear();
     context.read<FarmAccountCubit>().reset();
     context.read<FeedChannelCubit>().clear();
+    mainSourceCart.reset();
 
     // Reset app state cubits
     context.read<FeedBottomNavCubit>().changeTab(0);

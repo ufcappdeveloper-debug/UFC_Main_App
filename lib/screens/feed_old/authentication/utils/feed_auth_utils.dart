@@ -8,6 +8,7 @@ import 'package:ufc_mobile/main.dart';
 import 'package:ufc_mobile/riverpod/auth/auth.dart';
 import 'package:ufc_mobile/screens/app_launch.dart';
 import 'package:ufc_mobile/screens/feed/application/authentication/auth_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/business_config/business_config_cubit.dart';
 import 'package:ufc_mobile/screens/feed/domain/entities/authentication/user_model.dart';
 import 'package:ufc_mobile/screens/feed_old/authentication/utils/smooth_nav_utils.dart';
 import 'package:ufc_mobile/screens/feed_old/authentication/widgets/temporary_splash_screen.dart';
@@ -37,6 +38,12 @@ class AuthUtils {
       if (user == null) {
         _navigating = false;
         return;
+      }
+
+      // Never open the app without knowing the business mode (a no-op
+      // when AutoLogin already loaded it).
+      if (context.mounted) {
+        await context.read<BusinessConfigCubit>().ensureLoaded();
       }
 
       // Handle notification tap case

@@ -5,6 +5,7 @@ import 'package:ufc_mobile/global/app_update/app_update.dart';
 import 'package:ufc_mobile/global/app_update/update_dialog.dart';
 import 'package:ufc_mobile/global/shared/constants/app_colors.dart';
 import 'package:ufc_mobile/screens/feed/application/authentication/auth_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/business_config/business_config_cubit.dart';
 import 'package:ufc_mobile/screens/feed_old/authentication/utils/feed_auth_utils.dart';
 
 class AutoLogin extends ConsumerStatefulWidget {
@@ -30,9 +31,13 @@ class _AutoLoginState extends ConsumerState<AutoLogin> {
   }
 
   Future<void> _init() async {
-    // future() async {
-    await _checkForUpdate();
-    // }
+    // The business mode decides the home screen: load it together with
+    // the update check, before the app opens (plan §1).
+    final businessConfig = context.read<BusinessConfigCubit>();
+    await Future.wait([
+      _checkForUpdate(),
+      businessConfig.load(),
+    ]);
 
     // if (!context.mounted) return;
     // await LoadingDialog.show(context, future());

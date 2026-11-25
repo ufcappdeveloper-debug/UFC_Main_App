@@ -22,11 +22,9 @@ class FeedBottomBarUtils {
   static Widget getPageForTab(String name, BuildContext context) {
     switch (name) {
       case "Home":
-        return Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * 0.315,
-            ),
-            child: FeedHomePage());
+        // FeedHomePage sets its own top offset (the Main Source home
+        // moves it while scrolling).
+        return FeedHomePage();
 
       case "Products":
         return CategoryScreen(key: CategoryScreen.categoryKey);

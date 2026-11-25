@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:dio/dio.dart';
@@ -7,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:ufc_mobile/global/util/common/invoice_file.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:ufc_mobile/data/order_service.dart';
 import 'package:ufc_mobile/global/extensions/app_font_family.dart';
@@ -62,16 +61,7 @@ class _FeedOrderDetailsState extends State<FeedOrderDetails> {
       throw 'Order not found';
     }
     try {
-      Directory? tempDir;
-      if (Platform.isIOS) {
-        tempDir = await getApplicationDocumentsDirectory();
-      } else {
-        tempDir = Directory('/storage/emulated/0/Download');
-        if (!await tempDir.exists()) {
-          tempDir = await getExternalStorageDirectory();
-        }
-      }
-      String fullPath = "${tempDir?.path}/${widget.order.id}-invoice.pdf";
+      final fullPath = await InvoiceFile.pathFor(widget.order.id!);
       Response response =
           await OrderService().getOrderInvoice(widget.order.id, fullPath);
       if (response.statusCode == 200) {

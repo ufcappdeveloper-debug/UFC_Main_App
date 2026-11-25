@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:ufc_mobile/screens/feed/presentation/main_source/widgets/main_source_cart_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ufc_mobile/global/extensions/app_images.dart';
@@ -75,6 +76,13 @@ class _CartScreenState extends State<FeedCartScreen> {
     if (index == 1) {
       CategoryScreen.categoryKey.currentState?.resetTab();
     }
+  }
+
+  void _openMainSourceProducts() {
+    context.read<FeedBottomNavCubit>().changeTab(1);
+    context.read<AppBarHeightCubit>().setHeight(31);
+    context.read<AppBarCubit>().setMode(AppBarMode.channel);
+    context.read<FeedBackgroundCubit>().updateBackground(AppImages.feedSmallBg);
   }
 
   Future<void> showDeleteItemDialog({
@@ -196,19 +204,23 @@ class _CartScreenState extends State<FeedCartScreen> {
         listenWhen: (p, c) => p.channel != c.channel,
         listener: (context, channel) =>
             setState(() => _tab = channel.isDistributor ? 1 : 0),
-        child: Column(
-          children: [
-            CartChannelSwitch(
-              selected: _tab,
-              onChanged: (i) => setState(() => _tab = i),
-            ),
-            Expanded(
-              child: _tab == 1
-                  ? DistributorCartView(onShopNow: () => _shopNowTapped(1))
-                  : _buildStationCart(context, isWide, isSmall),
-            ),
-          ],
-        ),
+        child: context.watch<FeedChannelCubit>().state.isMainSource
+            // Main Source mode: only the Main Source cart, no switch.
+            ? MainSourceCartView(onShopNow: _openMainSourceProducts)
+            : Column(
+                children: [
+                  CartChannelSwitch(
+                    selected: _tab,
+                    onChanged: (i) => setState(() => _tab = i),
+                  ),
+                  Expanded(
+                    child: _tab == 1
+                        ? DistributorCartView(
+                            onShopNow: () => _shopNowTapped(1))
+                        : _buildStationCart(context, isWide, isSmall),
+                  ),
+                ],
+              ),
       ),
     );
   }

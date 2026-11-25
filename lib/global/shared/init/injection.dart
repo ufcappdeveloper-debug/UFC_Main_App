@@ -23,6 +23,7 @@ import 'category_injection.dart';
 import 'contact_injection.dart';
 import 'death_injection.dart';
 import 'distributor_injection.dart';
+import 'main_source_injection.dart';
 import 'members_injection.dart';
 import 'mothers_babies_injection.dart';
 import 'notification_injection.dart';
@@ -57,5 +58,6 @@ Future<void> init() async {
   registerMothersBabiesModule();
   registerFavoriteModule();
   registerDistributorModule();
+  registerMainSourceModule();
   registerMembersModule();
 }

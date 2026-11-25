@@ -1,11 +1,10 @@
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:ufc_mobile/global/util/common/invoice_file.dart';
 import 'package:ufc_mobile/data/order_service.dart';
 import 'package:ufc_mobile/screens/feed_old/order_details/widgets/receipt/receipt_product_container.dart';
 import 'package:ufc_mobile/screens/feed_old/order_details/widgets/receipt/reciept_amount_summary_section.dart';
@@ -44,17 +43,7 @@ class _ReceiptPageState extends ConsumerState<ReceiptPage>
       throw 'Order not found';
     }
     try {
-      Directory? tempDir;
-      if (Platform.isIOS) {
-        tempDir = await getApplicationDocumentsDirectory();
-      } else {
-        tempDir = Directory('/storage/emulated/0/Download');
-        if (!await tempDir.exists()) {
-          tempDir = await getExternalStorageDirectory();
-        }
-      }
-      String fullPath =
-          "${tempDir?.path}/${widget.orderDetails.id}-invoice.pdf";
+      final fullPath = await InvoiceFile.pathFor(widget.orderDetails.id!);
       Response response = await OrderService()
           .getOrderInvoice(widget.orderDetails.id, fullPath);
       if (response.statusCode == 200) {

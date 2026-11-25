@@ -22,6 +22,10 @@ import 'package:ufc_mobile/screens/feed/application/address/address_cubit.dart';
 import 'package:ufc_mobile/screens/feed/application/distributor/distributor_cart_cubit.dart';
 import 'package:ufc_mobile/screens/feed/application/distributor/distributor_catalog_cubit.dart';
 import 'package:ufc_mobile/screens/feed/application/feed_channel/feed_channel_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/business_config/business_config_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/main_source/main_source_cart_cubit.dart';
+import 'package:ufc_mobile/screens/feed/application/main_source/main_source_home_cubit.dart';
+import 'package:ufc_mobile/screens/feed/presentation/main_source/widgets/business_config_lifecycle.dart';
 import 'package:ufc_mobile/screens/feed/application/app_settings/app_setting_cubit.dart';
 import 'package:ufc_mobile/screens/feed/application/bottom_bar_bloc/bottom_bar_bloc.dart';
 import 'package:ufc_mobile/screens/feed/application/cart/cart_cubit.dart';
@@ -83,8 +87,17 @@ class App extends StatelessWidget {
             BlocProvider(
               create: (_) => sl<ProductListCubit>()..getProducts(),
             ),
-            BlocProvider(create: (_) => FeedChannelCubit()),
+            // Business mode first: the feed channel follows it.
+            BlocProvider(create: (_) => sl<BusinessConfigCubit>()),
+            BlocProvider(
+              create: (context) => FeedChannelCubit(
+                  businessConfig: context.read<BusinessConfigCubit>()),
+            ),
             BlocProvider(create: (_) => sl<FarmAccountCubit>()),
+            BlocProvider(create: (_) => sl<MainSourceHomeCubit>()),
+            BlocProvider(
+              create: (_) => sl<MainSourceCartCubit>()..fetchCartCount(),
+            ),
             BlocProvider(
               create: (_) => sl<DistributorCartCubit>()..fetchCartCount(),
             ),
@@ -190,7 +203,8 @@ class App extends StatelessWidget {
               create: (_) => sl<FavoriteCubit>(),
             ),
           ],
-          child: BlocBuilder<LanguageCubit, Locale>(
+          child: BusinessConfigLifecycle(
+            child: BlocBuilder<LanguageCubit, Locale>(
             builder: (context, locale) {
               return GestureDetector(
                 onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -280,6 +294,7 @@ class App extends StatelessWidget {
                 ),
               );
             },
+          ),
           ),
         );
       },

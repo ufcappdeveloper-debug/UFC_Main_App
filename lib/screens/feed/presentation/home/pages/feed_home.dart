@@ -11,6 +11,7 @@ import 'package:ufc_mobile/screens/feed/presentation/bottom_bar/page/feed_bottom
 
 import '../../../application/authentication/auth_cubit.dart';
 import '../../../application/bottom_bar_bloc/bottom_bar_bloc.dart';
+import '../../../application/business_config/business_config_cubit.dart';
 import '../../../application/feed_channel/feed_channel_cubit.dart';
 import '../../../application/feed_channel/feed_channel_state.dart';
 import '../../../application/station/station_cubit.dart';
@@ -19,6 +20,7 @@ import '../widgets/feed_home_helper.dart';
 import '../../../domain/entities/product/product_list_params.dart';
 import '../../category/pages/category_screen.dart';
 import '../../distributor/utils/distributor_style.dart';
+import '../../main_source/pages/main_source_home_page.dart';
 
 /// Feed Home (design: "Feed - Home v2"): hero title plus two entry cards,
 /// "Buy from Station" and "Buy from Distributor".
@@ -80,18 +82,36 @@ class _FeedHomePageState extends State<FeedHomePage> {
     return context.read<StationCubit>().state is StationSuccess;
   }
 
+  /// The channel opened automatically in this launch, when only one of
+  /// Station / Distributor is enabled (plan §2: skip the choice).
+  static FeedChannel? _autoOpened;
+
+  void _autoOpenSingle(FeedChannel? only) {
+    if (only == null) {
+      _autoOpened = null;
+      return;
+    }
+    if (_autoOpened == only) return;
+    _autoOpened = only;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _open(only);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final options = [
-      _HomeOption(
+    final config = context.watch<BusinessConfigCubit>().state.config;
+    // Main Source mode: no Station / Distributor choice (plan §2).
+    if (config.isMainSource) return const MainSourceHomePage();
+    final stationOption = _HomeOption(
         title: 'Buy from Station',
         subtitle: 'Order from a nearby station for pickup or delivery',
         icon: 'assets/svg/feed/stations_icon.svg',
         iconSize: const Size(26, 26),
         mirror: false,
         onTap: () => _open(FeedChannel.station),
-      ),
-      _HomeOption(
+      );
+    final distributorOption = _HomeOption(
         title: 'Buy from Distributor',
         subtitle: 'Order directly from approved feed distributors',
         icon: 'assets/svg/feed/truck.svg',
@@ -99,12 +119,20 @@ class _FeedHomePageState extends State<FeedHomePage> {
         // The truck faces the reading direction.
         mirror: !isArOrUr,
         onTap: () => _open(FeedChannel.distributor),
-      ),
+      );
+    // Only the enabled businesses; distributor always on top, in every
+    // language.
+    final ordered = [
+      if (config.distributorsEnabled) distributorOption,
+      if (config.stationsEnabled) stationOption,
     ];
-    // Distributor always on top, in every language.
-    final ordered = options.reversed.toList();
+    _autoOpenSingle(ordered.length != 1
+        ? null
+        : config.stationsEnabled
+            ? FeedChannel.station
+            : FeedChannel.distributor);
 
-    return BlocListener<AuthCubit, AuthState>(
+    final page = BlocListener<AuthCubit, AuthState>(
       listenWhen: (prev, curr) => curr is ProfileLoadedSuccess,
       listener: (context, state) {
         if (state is ProfileLoadedSuccess) _fetchStationProducts(state.user);
@@ -127,6 +155,14 @@ class _FeedHomePageState extends State<FeedHomePage> {
                     ),
                     const SizedBox(height: 16),
                     const Spacer(),
+                    if (ordered.isEmpty)
+                      Text(
+                        'This service is not accepting new orders at the moment.'
+                            .tr(),
+                        textAlign: TextAlign.center,
+                        style: DistributorStyle.style(
+                            size: 14, color: Colors.white),
+                      ),
                     for (final option in ordered) ...[
                       _HomeOptionCard(option: option),
                       if (option != ordered.last) const SizedBox(height: 16),
@@ -138,6 +174,11 @@ class _FeedHomePageState extends State<FeedHomePage> {
           ],
         ),
       ),
+    );
+    // Below the hero banner (was set by FeedBottomBarUtils).
+    return Padding(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.315),
+      child: page,
     );
   }
 }

@@ -14,6 +14,7 @@ import 'package:ufc_mobile/global/config/config.dart';
 import 'package:ufc_mobile/global/shared/constants/constants.dart';
 import 'package:ufc_mobile/global/shared/widgets/custom_widgets/custom_snack_bar.dart';
 import 'package:ufc_mobile/models/video/video_call.dart';
+import 'package:ufc_mobile/screens/feed/presentation/main_source/utils/main_source_push.dart';
 import 'package:ufc_mobile/screens/navigation/pages/bottom_nav_bar.dart';
 import 'package:ufc_mobile/screens/pet_veterinary_2/pages/calling_screen_2.dart';
 import 'package:ufc_mobile/screens/pet_veterinary_2/pages/chat/chat_screen_2.dart';
@@ -146,6 +147,7 @@ class FirebaseNotification {
   }
 
   void _showNotification(RemoteMessage message) async {
+    MainSourcePush.onReceived(message.data);
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
 
@@ -180,6 +182,8 @@ class FirebaseNotification {
 
     if (data != null) {
       final context = Constants.navigatorKey.currentContext;
+      // Main Source orders: open the order details.
+      if (data is Map && MainSourcePush.onTap(context, data)) return;
       final isCall = data['is_call']?.toString().toTryBool();
 
       if (isCall == true) {

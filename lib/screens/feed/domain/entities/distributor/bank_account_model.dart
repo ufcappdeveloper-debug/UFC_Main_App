@@ -20,7 +20,9 @@ class BankAccountModel {
   BankAccountModel.fromJson(Map<String, dynamic> json) {
     id = parseInt(json['id']);
     bankName = parseString(json['bank_name']);
-    accountName = parseString(json['account_name']);
+    // Distributors send `account_name`, Main Sources `account_holder_name`.
+    accountName = parseString(json['account_name']) ??
+        parseString(json['account_holder_name']);
     iban = parseString(json['iban']);
     accountNumber = parseString(json['account_number']);
     branch = parseString(json['branch']);

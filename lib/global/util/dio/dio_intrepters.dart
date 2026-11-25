@@ -5,6 +5,7 @@ import 'package:ufc_mobile/global/config/config.dart';
 import 'package:ufc_mobile/global/config/farm_session.dart';
 import 'package:ufc_mobile/main.dart';
 import 'package:ufc_mobile/global/util/analytic/sentry_tracker.dart';
+import 'package:ufc_mobile/global/util/dio/business_mode_events.dart';
 import 'package:ufc_mobile/global/util/dio/dio_utils.dart';
 import 'package:ufc_mobile/global/util/log/log_utils.dart';
 
@@ -85,6 +86,9 @@ class AppInterceptor extends Interceptor {
           : null;
 
       debugLog('Response Data: $responseData');
+
+      // Business mode switched by the admin: refetch config, go home.
+      BusinessModeEvents.reportIfDisabled(responseStatusCode, responseData);
 
       // Removed from the owner's farm: back to "My farm".
       if (responseStatusCode == 403 &&

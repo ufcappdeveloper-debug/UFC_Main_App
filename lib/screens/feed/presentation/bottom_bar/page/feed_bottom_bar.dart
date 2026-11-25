@@ -16,7 +16,14 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../../../../global/shared/widgets/show_confirmation_dailog.dart';
 import '../../../application/cart/cart_cubit.dart';
 import '../../../application/cart/cart_state.dart';
+import '../../../application/business_config/business_config_cubit.dart';
 import '../../../application/distributor/distributor_cart_cubit.dart';
+import '../../../application/main_source/main_source_cart_cubit.dart';
+import '../../../domain/entities/main_source/main_source_api_exception.dart';
+import '../../main_source/pages/main_source_home_page.dart'
+    show mainSourceHomeExpanded;
+import '../../main_source/utils/main_source_errors.dart';
+import 'package:ufc_mobile/global/shared/widgets/custom_widgets/custom_snack_bar.dart';
 import '../../../application/navbar/app_bar_cubit.dart';
 import '../../category/pages/category_screen.dart';
 
@@ -56,6 +63,16 @@ class _FeedBottomBarState extends State<FeedBottomBar>
   void initState() {
     super.initState();
 
+    // Main Source mode opens on the Products tab; marketplace mode keeps
+    // opening on Home.
+    if (context.read<BusinessConfigCubit>().state.isMainSource &&
+        context.read<FeedBottomNavCubit>().state == 0) {
+      context.read<FeedBottomNavCubit>().changeTab(1);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _syncAppBar(context.read<FeedBottomNavCubit>().state);
+      });
+    }
+
     final currentFeedTab = context.read<FeedBottomNavCubit>().state;
     final initialImage =
         currentFeedTab == 0 ? AppImages.feedBg : AppImages.feedSmallBg;
@@ -63,11 +80,19 @@ class _FeedBottomBarState extends State<FeedBottomBar>
     context.read<FeedBackgroundCubit>().updateBackground(initialImage);
   }
 
+  /// Small header on every tab but Home, and on the Main Source home
+  /// while its sheet is lifted.
+  bool _smallHeader(int index) =>
+      index != 0 ||
+      (mainSourceHomeExpanded.value &&
+          context.read<BusinessConfigCubit>().state.isMainSource);
+
   void _syncAppBar(int index) {
-    context.read<AppBarHeightCubit>().setHeight(index == 0 ? 74 : 31);
+    final small = _smallHeader(index);
+    context.read<AppBarHeightCubit>().setHeight(small ? 31 : 74);
     context
         .read<AppBarCubit>()
-        .setMode(index == 0 ? AppBarMode.normal : AppBarMode.channel);
+        .setMode(small ? AppBarMode.channel : AppBarMode.normal);
     // context.read<BottomNavIndexCubit>().update(farm: index == 0);
   }
 
@@ -85,7 +110,8 @@ class _FeedBottomBarState extends State<FeedBottomBar>
     }
     context.read<FeedBottomNavCubit>().changeTab(index);
     _syncAppBar(index);
-    final imagePath = index == 0 ? AppImages.feedBg : AppImages.feedSmallBg;
+    final imagePath =
+        _smallHeader(index) ? AppImages.feedSmallBg : AppImages.feedBg;
     context.read<FeedBackgroundCubit>().updateBackground(imagePath);
     if (index == 1) {
       // Category tab → reset UI tab, then fetch filtered products
@@ -106,10 +132,31 @@ class _FeedBottomBarState extends State<FeedBottomBar>
     }
   }
 
+  /// `403 BUSINESS_MODE_DISABLED` (plan §1): show the message and go back
+  /// to Home, which renders the new mode (the config is being refetched).
+  Future<void> _onBusinessModeDisabled() async {
+    // Let the screen that made the call close its loading dialog first.
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
+    for (final key in navigatorKeys.values) {
+      key.currentState?.popUntil((r) => r.isFirst);
+    }
+    context.read<BottomBarVisibilityCubit>().show();
+    context.read<FeedBottomNavCubit>().changeTab(0);
+    _syncAppBar(0);
+    context.read<FeedBackgroundCubit>().updateBackground(AppImages.feedBg);
+    CustomSnackBar.error(
+        context, mainSourceCodeText(MainSourceErrorCode.businessModeDisabled)!);
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return VisibilityDetector(
+    return BlocListener<BusinessConfigCubit, BusinessConfigState>(
+      listenWhen: (p, c) => p.modeDisabledEventId != c.modeDisabledEventId,
+      listener: (_, __) => _onBusinessModeDisabled(),
+      child: VisibilityDetector(
         key: const Key('feed-bottom-bar'),
         onVisibilityChanged: (info) {
           if (info.visibleFraction > 0) {
@@ -259,11 +306,13 @@ class _FeedBottomBarState extends State<FeedBottomBar>
               },
             );
           },
-        ));
+        )),
+    );
   }
 }
 
-/// Shop cart + distributor cart, shown on the Cart tab.
+/// Shop cart + distributor cart (or the Main Source cart), shown on the
+/// Cart tab.
 int _cartBadge(BuildContext context) {
   final shop = context.select<CartCubit, int>((c) {
     final s = c.state;
@@ -273,6 +322,12 @@ int _cartBadge(BuildContext context) {
   });
   final distributor =
       context.select<DistributorCartCubit, int>((c) => c.state.count);
+  // Main Source mode shows only the Main Source cart.
+  final mainSource = context.select<BusinessConfigCubit, bool>(
+      (c) => c.state.isMainSource);
+  if (mainSource) {
+    return context.select<MainSourceCartCubit, int>((c) => c.state.count);
+  }
   return shop + distributor;
 }
 

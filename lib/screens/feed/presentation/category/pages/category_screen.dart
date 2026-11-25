@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ufc_mobile/screens/feed/presentation/main_source/pages/main_source_products_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ufc_mobile/global/shared/functions/is_network_error.dart';
 import 'package:ufc_mobile/global/shared/widgets/custom_reload_provider.dart';
@@ -390,9 +391,11 @@ class _CategoryScreenState extends State<CategoryScreen>
     // The Products tab follows the channel picked on Home.
     return BlocBuilder<FeedChannelCubit, FeedChannelState>(
       buildWhen: (p, c) => p.channel != c.channel,
-      builder: (context, channel) => channel.isDistributor
-          ? const DistributorProductsPage()
-          : _buildStationProducts(context),
+      builder: (context, channel) => channel.isMainSource
+          ? const MainSourceProductsPage()
+          : channel.isDistributor
+              ? const DistributorProductsPage()
+              : _buildStationProducts(context),
     );
   }
 

@@ -2,7 +2,9 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/distributor/distributor_model.dart';
 
-enum FeedChannel { station, distributor }
+/// [mainSource] is forced by the business config (plan §7.1); it is never
+/// chosen by the user.
+enum FeedChannel { station, distributor, mainSource }
 
 class FeedChannelState extends Equatable {
   final FeedChannel channel;
@@ -21,6 +23,7 @@ class FeedChannelState extends Equatable {
   });
 
   bool get isDistributor => channel == FeedChannel.distributor;
+  bool get isMainSource => channel == FeedChannel.mainSource;
 
   FeedChannelState copyWith({
     FeedChannel? channel,
